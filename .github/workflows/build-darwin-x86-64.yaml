@@ -215,10 +215,13 @@ jobs:
           name: "apio-cli-darwin-x86-64-installer"
           path: "apio-cli-darwin-x86-64-${{env.PACKAGE_TAG}}-installer.pkg"
 
-      # -- Uninstall apio to make sure we test with apio from the file bundle.
+      # -- Uninstall apio and all other pip packages to make sure the next
+      # -- step uses the apio binary from the bundle.
       - name: Uninstall apio
         run: |
-          pip uninstall apio
+          set -x
+          pip freeze | xargs pip uninstall -y
+          pip freeze
 
       # -- We perform the test after posting the artifact to make sure
       # -- We don't modify they unintentionally
