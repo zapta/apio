@@ -256,8 +256,8 @@ jobs:
           ${apio_bin} lint
           ${apio_bin} report
 
-      # - name: Test Apio file bundle
-      #   uses: ./.github/actions/test-apio-bundle
-      #   with:
-      #     apio-bundle-dir: _dist/Apio
-      #     work-dir-name: test_project
+      - name: Test Apio file bundle
+        uses: ./.github/actions/test-apio-bundle
+        with:
+          apio-bundle-dir: _dist/Apio
+          work-dir-name: _work_dir
