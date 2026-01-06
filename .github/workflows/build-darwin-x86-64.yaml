@@ -218,7 +218,7 @@ jobs:
       # -- Uninstall apio and all other pip packages to make sure the next
       # -- step uses the apio binary from the bundle.
       - name: Uninstall apio
-        uses: ./_apio_repo/.github/actions/uninstall-all-pip-packages
+        uses: ./_apio-repo/.github/actions/uninstall-all-pip-packages
 
       # -- We perform the test after posting the artifact to make sure
       # -- We don't modify they unintentionally
