@@ -84,6 +84,8 @@ jobs:
           ref: ${{env.APIO_COMMIT}}
           path: _apio-repo
 
+      # Having apio installed as a package is required for the pyinstaller
+      # build process.
       - name: Pip install apio
         run: |
           python -m pip install --upgrade pip
@@ -213,16 +215,21 @@ jobs:
           name: "apio-cli-darwin-x86-64-installer"
           path: "apio-cli-darwin-x86-64-${{env.PACKAGE_TAG}}-installer.pkg"
 
+      # -- Uninstall apio to make sure we test with apio from the file bundle.
+      - name: Uninstall apio
+        run: |
+          pip uninstall apio
+
       # -- We perform the test after posting the artifact to make sure
       # -- We don't modify they unintentionally
-      - name: Test apio file bundle
+      - name: Test apio from the file bundle
         run: |
           # Enable command tracing
           set -x
 
           # Set a custom empty apio home.
-          export APIO_HOME="$(realpath _apio_test_home)"
-          echo "APIO_HOME=${APIO_HOME}"
+          export APIO_HOME_DIR="$(realpath _apio_test_home)"
+          echo "APIO_HOME_DIR=${APIO_HOME}"
 
           # Get a path to the apio bin in the bundle
           ls -al _dist/Apio
