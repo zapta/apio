@@ -222,39 +222,39 @@ jobs:
 
       # -- We perform the test after posting the artifact to make sure
       # -- We don't modify they unintentionally
-      - name: Test apio from the file bundle
-        run: |
-          # Enable command tracing
-          set -x
+      # - name: Test apio from the file bundle
+      #   run: |
+      #     # Enable command tracing
+      #     set -x
 
-          # Set a custom empty apio home.
-          export APIO_HOME_DIR="$(realpath _apio_test_home)"
-          echo "APIO_HOME_DIR=${APIO_HOME}"
+      #     # Set a custom empty apio home.
+      #     export APIO_HOME_DIR="$(realpath _apio_test_home)"
+      #     echo "APIO_HOME_DIR=${APIO_HOME}"
 
-          # Get a path to the apio bin in the bundle
-          ls -al _dist/Apio
-          apio_bin="$(realpath _dist/Apio/apio)"
-          echo "apio_bin=$apio_bin"
+      #     # Get a path to the apio bin in the bundle
+      #     ls -al _dist/Apio
+      #     apio_bin="$(realpath _dist/Apio/apio)"
+      #     echo "apio_bin=$apio_bin"
 
-          # Make and change to the project dir
-          mkdir test_project
-          cd test_project
+      #     # Make and change to the project dir
+      #     mkdir test_project
+      #     cd test_project
 
-          # Get packages
-          ${apio_bin} packages install
+      #     # Get packages
+      #     ${apio_bin} packages install
 
-          # Fetch a project
-          ${apio_bin} example fetch alhambra-ii/getting-started
-          ls -al
+      #     # Fetch a project
+      #     ${apio_bin} example fetch alhambra-ii/getting-started
+      #     ls -al
 
-          # Get system info
-          ${apio_bin} info system
+      #     # Get system info
+      #     ${apio_bin} info system
 
-          # Run a few commands
-          ${apio_bin} build
-          ${apio_bin} clean
-          ${apio_bin} lint
-          ${apio_bin} report
+      #     # Run a few commands
+      #     ${apio_bin} build
+      #     ${apio_bin} clean
+      #     ${apio_bin} lint
+      #     ${apio_bin} report
 
       - name: Test Apio file bundle
         uses: ./.github/actions/test-apio-bundle
