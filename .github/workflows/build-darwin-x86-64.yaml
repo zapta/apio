@@ -213,38 +213,41 @@ jobs:
           name: "apio-cli-darwin-x86-64-installer"
           path: "apio-cli-darwin-x86-64-${{env.PACKAGE_TAG}}-installer.pkg"
 
-
       # -- We perform the test after posting the artifact to make sure
       # -- We don't modify they unintentionally
       - name: Test apio file bundle
         run: |
-          # Add the apio file bundle dir to the path
-          apio_abs_dir="$(realpath _dist/Apio)"
-          echo "Adding to PATH (this step only): $apio_abs_dir"
-          export PATH="$PATH:$apio_abs_dir"
-
-          # Make project dir
-          mkdir test_project
-          cd test_project
-
-          # Fetch a project
-          apio example fetch alhambra-ii/getting-started
-          ls -al
-
           # Enable command tracing
           set -x
 
+          # Set a custom empty apio home.
+          export APIO_HOME="$(realpath _apio_test_home)"
+          echo "APIO_HOME=${APIO_HOME}"
+
+          # Get a path to the apio bin in the bundle
+          ls -al _dist/Apio
+          apio_bin="$(realpath _dist/Apio/apio)"
+          echo "apio_bin=$apio_bin"
+
+          # Make and change to the project dir
+          mkdir test_project
+          cd test_project
+
           # Get packages
-          apio packages install
+          ${apio_bin} packages install
+
+          # Fetch a project
+          ${apio_bin} example fetch alhambra-ii/getting-started
+          ls -al
 
           # Get system info
-          apio info system
+          ${apio_bin} info system
 
           # Run a few commands
-          apio build
-          apio clean
-          apio lint
-          apio report
+          ${apio_bin} build
+          ${apio_bin} clean
+          ${apio_bin} lint
+          ${apio_bin} report
 
       # - name: Test Apio file bundle
       #   uses: ./.github/actions/test-apio-bundle
