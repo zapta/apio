@@ -215,10 +215,10 @@ jobs:
           name: "apio-cli-darwin-x86-64-installer"
           path: "apio-cli-darwin-x86-64-${{env.PACKAGE_TAG}}-installer.pkg"
 
-      # -- Uninstall apio and all other pip packages to make sure the next
+      # -- Uninstall apio and all the other pip packages to make sure the next
       # -- step uses the apio binary from the bundle.
-      - name: Uninstall apio
-        uses: ./_apio-repo/.github/actions/uninstall-all-pip-packages
+      - name: Uninstall all pip packages (including apio)
+        uses: fpgawars/apio-workflows/.github/actions/uninstall-all-pip-packages@main
 
       # -- We perform the test after posting the artifact to make sure
       # -- We don't modify they unintentionally
