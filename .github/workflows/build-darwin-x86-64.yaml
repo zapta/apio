@@ -212,3 +212,30 @@ jobs:
           if-no-files-found: error
           name: "apio-cli-darwin-x86-64-installer"
           path: "apio-cli-darwin-x86-64-${{env.PACKAGE_TAG}}-installer.pkg"
+
+
+      # -- We perform the test after posting the artifact to make sure
+      # -- We don't modify they unintentionally
+      - name: Test the file bundle
+        run: |
+          # Add the apio file bundle dir to the path
+          apio_abs_dir="$(realpath apio)"
+          echo "Adding to PATH (this step only): $apio_abs_dir"
+          export PATH="$PATH:$apio_abs_dir"
+
+          # Make project dir
+          mkdir test_project
+          cd test_project
+
+          # Fetch a project
+          apio example fetch alhambra-ii/getting-started
+          ls -al
+
+          # Enable command tracing
+          set -x
+
+          # Run a few commands
+          apio build
+          apio clean
+          apio lint
+          apio report
