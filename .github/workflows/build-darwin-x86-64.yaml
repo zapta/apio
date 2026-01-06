@@ -220,8 +220,14 @@ jobs:
       - name: Uninstall apio
         run: |
           set -x
+          # Apio packages installed from local sources and thus requires
+          # an explicit uninstall
           pip uninstall apio -q -y
+
+          # Uninstall the rest.
           pip freeze | xargs pip uninstall -q -y
+
+          # Dump installed packages, Should be empty.
           pip freeze
 
       # -- We perform the test after posting the artifact to make sure
