@@ -218,17 +218,7 @@ jobs:
       # -- Uninstall apio and all other pip packages to make sure the next
       # -- step uses the apio binary from the bundle.
       - name: Uninstall apio
-        run: |
-          set -x
-          # Apio packages installed from local sources and thus requires
-          # an explicit uninstall
-          pip uninstall apio -q -y
-
-          # Uninstall the rest.
-          pip freeze | xargs pip uninstall -q -y
-
-          # Dump installed packages, Should be empty.
-          pip freeze
+        uses: ./.github/actions/uninstall-all-pip-packages
 
       # -- We perform the test after posting the artifact to make sure
       # -- We don't modify they unintentionally
