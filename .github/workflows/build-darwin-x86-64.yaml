@@ -216,10 +216,10 @@ jobs:
 
       # -- We perform the test after posting the artifact to make sure
       # -- We don't modify they unintentionally
-      - name: Test the file bundle
+      - name: Test apio file bundle
         run: |
           # Add the apio file bundle dir to the path
-          apio_abs_dir="$(realpath apio)"
+          apio_abs_dir="$(realpath _dist/Apio)"
           echo "Adding to PATH (this step only): $apio_abs_dir"
           export PATH="$PATH:$apio_abs_dir"
 
@@ -245,3 +245,9 @@ jobs:
           apio clean
           apio lint
           apio report
+
+      # - name: Test Apio file bundle
+      #   uses: ./.github/actions/test-apio-bundle
+      #   with:
+      #     apio-bundle-dir: _dist/Apio
+      #     work-dir-name: test_project
