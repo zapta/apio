@@ -234,6 +234,12 @@ jobs:
           # Enable command tracing
           set -x
 
+          # Get packages
+          apio packages install
+
+          # Get system info
+          apio info system
+
           # Run a few commands
           apio build
           apio clean
