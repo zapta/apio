@@ -220,7 +220,8 @@ jobs:
       - name: Uninstall apio
         run: |
           set -x
-          pip freeze | xargs pip uninstall -y
+          pip uninstall apio -q -y
+          pip freeze | xargs pip uninstall -q -y
           pip freeze
 
       # -- We perform the test after posting the artifact to make sure
