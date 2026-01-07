@@ -212,8 +212,7 @@ jobs:
           name: "apio-cli-darwin-x86-64-installer"
           path: "apio-cli-darwin-x86-64-${{env.PACKAGE_TAG}}-installer.pkg"
 
-      # -- Uninstall apio and all the other pip packages to make sure the next
-      # -- step uses the apio binary from the bundle.
+      # -- Make sure the apio pip installation does leak to the binary test.
       - name: Uninstall all pip packages (including apio)
         uses: fpgawars/apio-workflows/.github/actions/uninstall-all-pip-packages@main
 

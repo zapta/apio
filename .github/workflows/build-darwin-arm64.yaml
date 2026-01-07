@@ -207,3 +207,13 @@ jobs:
           if-no-files-found: error
           name: "apio-cli-darwin-arm64-installer"
           path: "apio-cli-darwin-arm64-${{env.PACKAGE_TAG}}-installer.pkg"
+
+      # -- Make sure the apio pip installation does leak to the binary test.
+      - name: Uninstall all pip packages (including apio)
+        uses: fpgawars/apio-workflows/.github/actions/uninstall-all-pip-packages@main
+
+      - name: Test Apio file bundle
+        uses: ./_apio-repo/.github/actions/test-apio-bundle
+        with:
+          apio-bundle-dir: _dist/Apio
+          work-dir-name: _work_dir
