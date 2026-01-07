@@ -195,7 +195,7 @@ jobs:
       - name: Test Apio file bundle
         uses: ./_apio-repo/.github/actions/test-apio-bundle
         with:
-          apio-bundle-dir: _debian/opt
+          apio-bundle-dir: _debian/opt/apio
           work-dir-name: _work_dir
 
       - name: Export the pyinstaller archive as an artifact
