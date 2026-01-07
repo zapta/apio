@@ -158,7 +158,7 @@ jobs:
         run: |
           mkdir _debian
 
-          # -- /opt/apio
+          # -- /opt/apio. We mv rather than cp to maintain internal symlinks.
           mkdir -p _debian/opt/apio
           # We mv instead of cp to preserve symlinks.
           mv _dist/apio/apio _debian/opt/apio
@@ -208,5 +208,5 @@ jobs:
       - name: Test Apio file bundle
         uses: ./_apio-repo/.github/actions/test-apio-bundle
         with:
-          apio-bundle-dir: _dist/Apio
+          apio-bundle-dir: _debian/opt
           work-dir-name: _work_dir
