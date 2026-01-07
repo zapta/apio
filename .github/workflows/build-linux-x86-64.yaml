@@ -187,6 +187,17 @@ jobs:
           dpkg-deb --build --root-owner-group _debian "apio-cli-linux-x86-64-${PACKAGE_TAG}-debian.deb"
           ls -l
 
+      # -- Now that we are done with the file bundle directory
+      # -- let's test it.
+      - name: Uninstall all pip packages (including apio)
+        uses: fpgawars/apio-workflows/.github/actions/uninstall-all-pip-packages@main
+
+      - name: Test Apio file bundle
+        uses: ./_apio-repo/.github/actions/test-apio-bundle
+        with:
+          apio-bundle-dir: _debian/opt
+          work-dir-name: _work_dir
+
       - name: Export the pyinstaller archive as an artifact
         uses: actions/upload-artifact@v4
         with:
@@ -200,13 +211,3 @@ jobs:
           if-no-files-found: error
           name: "apio-cli-linux-x86-64-debian"
           path: "apio-cli-linux-x86-64-${{env.PACKAGE_TAG}}-debian.deb"
-
-      # -- Make sure the apio pip installation does leak to the binary test.
-      - name: Uninstall all pip packages (including apio)
-        uses: fpgawars/apio-workflows/.github/actions/uninstall-all-pip-packages@main
-
-      - name: Test Apio file bundle
-        uses: ./_apio-repo/.github/actions/test-apio-bundle
-        with:
-          apio-bundle-dir: _debian/opt
-          work-dir-name: _work_dir
