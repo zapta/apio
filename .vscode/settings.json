@@ -147,6 +147,7 @@
         "olddata",
         "outcallback",
         "oversizing",
+        "pathlib",
         "pinout",
         "pkgbuild",
         "popd",
