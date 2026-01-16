@@ -35,7 +35,7 @@ runs:
         match = re.search(pattern, content)
         if not match:
             print(f"Warning: No RELEASE_DATE tuple found in {target_file} - no change made")
-            sys.exit(1)
+            exit(1)
         else:
             old_match = match.group(0)
             updated = re.sub(pattern, new_line, content, count=1)
