@@ -79,6 +79,11 @@ jobs:
           ref: ${{env.APIO_COMMIT}}
           path: _apio-repo
 
+      - name: Set apio release date
+        uses: ./_apio-repo/.github/actions/set-apio-release-date
+        with:
+          repo_path: _apio-repo
+
       - name: Pip install apio
         run: |
           python -m pip install --upgrade pip
