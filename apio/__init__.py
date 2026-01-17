@@ -14,15 +14,15 @@
 # -- DEVELOPER:
 # -- Change this release number and date when releasing a new Apio CLI version.
 # -- If incrementing Major or Minor, a new remote config file is required.
-RELEASE_VERSION = (1, 2, 1)  # Major, Minor, Patch.
+APIO_VERSION = (1, 2, 1)  # Major, Minor, Patch.
 
-# -- This is set automatically by the apio CLI build and publishing
-# -- workflows. Keep it as (0, 0, 0) to indicates that it's a place holder.
-# -- Contains Year, Month, Day, e.g. (2026, 1, 16).
-RELEASE_DATE = (0, 0, 0)
+# -- This is set automatically during build or publishing information to
+# -- provide additional information about the release. This string is included
+# -- the 'apio --version' message.
+RELEASE_INFO = ""
 
 # -- Get the version as a string. Ex: "0.10.1"
-__version__ = ".".join([str(s) for s in RELEASE_VERSION])
+__version__ = ".".join([str(s) for s in APIO_VERSION])
 
 __title__ = "apio"
 __description__ = "Open source ecosystem for open FPGA boards"

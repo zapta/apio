@@ -150,6 +150,7 @@
         "pathlib",
         "pinout",
         "pkgbuild",
+        "pluraliry",
         "popd",
         "posargs",
         "prevalidated",
