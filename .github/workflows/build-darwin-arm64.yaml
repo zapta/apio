@@ -8,6 +8,7 @@ env:
   PYTHON_VERSION: ""
   APIO_REPO: ""
   APIO_COMMIT: ""
+  RELEASE_TAG: ""
   PACKAGE_TAG: ""
 
 jobs:
@@ -82,7 +83,10 @@ jobs:
       - name: Set apio release info
         uses: ./_apio-repo/.github/actions/set-apio-release-info
         with:
+          repo_name: ${{env.APIO_REPO}}
           repo_path: _apio-repo
+          release_type: pyinstaller
+          release_tag: ${{env.RELEASE_TAG}}
 
       - name: Pip install apio
         run: |
