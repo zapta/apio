@@ -26,6 +26,12 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Show original __init__.py
+      shell: bash
+      run: |
+        set -x
+        cat -n "${{inputs.repo_path}}/apio/__init__.py"
+
     - name: Set RELEASE_INFO using Python
       shell: python
       run: |
@@ -64,4 +70,4 @@ runs:
       shell: bash
       run: |
         set -x
-        cat -n "${{inputs.repo_path}}/apio/__init.py"
+        cat -n "${{inputs.repo_path}}/apio/__init__.py"
