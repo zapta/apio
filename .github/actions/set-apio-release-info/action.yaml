@@ -7,17 +7,17 @@ inputs:
     description: "Relative path from the current working directory to the file containing RELEASE_INFO (e.g. apio/__init__.py)"
     required: true
 
-  repo_name:
-    description: 'The full repository name (e.g. "fpgawars/apio")'
-    required: true
+  # repo_name:
+  #   description: 'The full repository name (e.g. "fpgawars/apio")'
+  #   required: true
 
   release_type:
     description: 'The type of release (e.g. "pypi", "pyinstaller")'
     required: true
 
-  platform_id:
-    description: 'The underlying platform id (e.g. "darwin-arm64")'
-    required: true
+  # platform_id:
+  #   description: 'The underlying platform id (e.g. "darwin-arm64")'
+  #   required: true
 
   release_tag:
     description: 'The release tag/date (e.g. "2026-01-16")'
@@ -49,7 +49,7 @@ runs:
         repo_name    = "${{ inputs.repo_name }}"
         release_tag  = "${{ inputs.release_tag }}"
 
-        new_value = f'"{release_type}-{platform_id}-{repo_name}-{release_tag}"'
+        new_value = f'"{release_type}-{release_tag}"'
         new_line  = f'RELEASE_INFO = {new_value}'
 
         content = target_file.read_text(encoding="utf-8")
