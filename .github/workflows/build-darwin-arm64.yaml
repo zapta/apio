@@ -84,7 +84,7 @@ jobs:
         uses: ./_apio-repo/.github/actions/set-apio-release-info
         with:
           repo_path: _apio-repo
-          release_type: pyinstaller
+          release_type: pyinst
           release_tag: ${{env.RELEASE_TAG}}
 
       - name: Pip install apio

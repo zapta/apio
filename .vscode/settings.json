@@ -159,6 +159,7 @@
         "protoc",
         "pushd",
         "pwwang",
+        "pyinst",
         "pyinstaller",
         "pylint",
         "pymdownx",
