@@ -15,6 +15,10 @@ inputs:
     description: 'The type of release (e.g. "pypi", "pyinstaller")'
     required: true
 
+  platform_id:
+    description: 'The underlying platform id (e.g. "darwin-arm64")'
+    required: true
+
   release_tag:
     description: 'The release tag/date (e.g. "2026-01-16")'
     required: true
@@ -36,9 +40,10 @@ runs:
 
         repo_name    = "${{ inputs.repo_name }}"
         release_type = "${{ inputs.release_type }}"
+        platform_id = "${{ inputs.platform_id }}"
         release_tag  = "${{ inputs.release_tag }}"
 
-        new_value = f'"{repo_name} | {release_type} | {release_tag}"'
+        new_value = f'"{repo_name}-{release_type}-{platform_id}-{release_tag}"'
         new_line  = f'RELEASE_INFO = {new_value}'
 
         content = target_file.read_text(encoding="utf-8")
@@ -54,3 +59,9 @@ runs:
             updated = re.sub(pattern, new_line, content, count=1)
             target_file.write_text(updated, encoding="utf-8")
             print(f"Replaced '{old_match}' with '{new_line}' in {target_file}")
+
+    - name: Show updated __init__.py
+      shell: bash
+      run: |
+        set -x
+        cat -n "${{inputs.repo_path}}/apio/__init.py"
