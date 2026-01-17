@@ -5,7 +5,7 @@ on:
 
 env:
   # These are set later.
-  PLATFORM_ID: ""
+  TARGET_PLATFORM: ""
   PYTHON_VERSION: ""
   APIO_REPO: ""
   APIO_COMMIT: ""
@@ -60,7 +60,7 @@ jobs:
         with:
           json-file: build-info.json
           mappings: >-
-            PLATFORM_ID      platform-id
+            TARGET_PLATFORM  target-platform
             PYTHON_VERSION   apio-python-version
             APIO_REPO        repo
             APIO_COMMIT      repo-commit
@@ -86,7 +86,7 @@ jobs:
         uses: ./_apio-repo/.github/actions/set-apio-release-info
         with:
           repo_path: _apio-repo
-          platform_id: ${{env.PLATFORM_ID}}
+          platform_id: ${{env.TARGET_PLATFORM}}
           release_type: pyinst
           release_tag: ${{env.RELEASE_TAG}}
 
