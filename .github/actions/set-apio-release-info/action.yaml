@@ -28,7 +28,7 @@ runs:
         from pathlib import Path
         import re
 
-        target_file = Path("${{ inputs.repo_path }}")
+        target_file = Path("${{ inputs.repo_path }}") / "apio" / "__init__.py"
 
         if not target_file.is_file():
             print(f"Error: File not found: {target_file.resolve()}")
