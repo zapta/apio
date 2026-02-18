@@ -6,11 +6,16 @@
 
 The `apio lint` command checks the project's source files for errors, inconsistencies, and style violations using the `Verilator` tool included with Apio.
 
+If specified files are not specified, the top module of the project
+and its dependencies are linted.
+
+
 <h3>Examples</h3>
 
 ```
 apio lint                # Lint the entire design
 apio lint -t my_module   # Lint only 'my_module' and its dependencies
+apio lint file1.v file2  # Lint specified files only
 apio lint --all          # Enable all warnings, including style warnings
 apio lint --nosynth      # Do not define the SYNTHESIS macro.
 apio lint --novlt        # Disable the .vlt rule supression file.

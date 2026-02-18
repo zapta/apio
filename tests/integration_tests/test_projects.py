@@ -143,6 +143,14 @@ def _test_project(
         assert "-DAPIO_SIM=0" in result.output
         assert getsize(sb.proj_dir / "_build/default/hardware.vlt")
 
+        # -- 'apio lint <testbench.v>'
+        args = ["lint", testbench_file] + proj_arg
+        result = sb.invoke_apio_cmd(apio, args)
+        sb.assert_result_ok(result)
+        assert "SUCCESS" in result.output
+        assert "TOP_MODULE" not in result.output
+        assert "-DAPIO_SIM=0" in result.output
+
         # -- 'apio lint --nosynth'
         args = ["lint", "--nosynth"] + proj_arg
         result = sb.invoke_apio_cmd(apio, args)

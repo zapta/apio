@@ -199,9 +199,9 @@ def verilog_src_scanner(apio_env: ApioEnv) -> Scanner.Base:
 
         # Sanity check. Should be called only to scan verilog files. If
         # this fails, this is a programming error rather than a user error.
-        assert is_source_file(
-            file_node.name
-        ), f"Not a src file: {file_node.name}"
+        if not is_source_file(file_node.name):
+            cerror(f"'{file_node.name}' is not a source file.")
+            sys.exit(1)
 
         # Get the directory of the file, relative to the project root which is
         # the current working directory. This value is equals to "." if the
@@ -301,30 +301,42 @@ def verilator_lint_action(
     params = apio_env.params
     lint_params = params.target.lint
 
-    # -- Determine top module.
-    top_module = (
-        lint_params.top_module
-        if lint_params.top_module
-        else params.apio_env_params.top_module
-    )
+    # -- Determine if linting the entire project or just a few files,
+    lint_whole_project = not lint_params.file_names
+
+    # -- Determine if using a vlt file. We use it only when linting a whole
+    # -- project and --novlt was not specified.
+    using_vlt = lint_whole_project and (not lint_params.novlt)
+
+    # -- Determine the top module.
+    if lint_params.top_module:
+        # -- Case 1: Top module was specified in the command line.
+        top_module = lint_params.top_module
+    elif lint_whole_project:
+        # -- Case 2: Linting the entire project, use top module from apio.ini,
+        top_module = params.apio_env_params.top_module
+    else:
+        # -- Linting only a few files and top module was not specified.
+        top_module = None
 
     # -- Construct the action
     action = (
         "verilator_bin --lint-only --quiet --bbox-unsup --timing "
-        "-Wno-TIMESCALEMOD -Wno-MULTITOP {0} -DAPIO_SIM=0 "
-        "{1} {2} {3} {4} {5} {6} {7} {8} {9} {10} $SOURCES"
+        "-Wno-TIMESCALEMOD -Wno-MULTITOP {0} {1} -DAPIO_SIM=0 "
+        "{2} {3} {4} {5} {6} {7} {8} {9} {10} {11} $SOURCES"
     ).format(
         "" if lint_params.nosynth else "-DSYNTHESIZE",
+        "" if lint_whole_project else "-Wno-MODMISSING",
         "-Wall" if lint_params.verilator_all else "",
         "-Wno-style" if lint_params.verilator_no_style else "",
         map_params(lint_params.verilator_no_warns, "-Wno-{}"),
         map_params(lint_params.verilator_warns, "-Wwarn-{}"),
-        f"--top-module {top_module}",
+        f"--top-module {top_module}" if top_module else "",
         get_define_flags(apio_env),
         map_params(extra_params, "{}"),
-        map_params(lib_dirs, '-I"{}"'),
-        "" if lint_params.novlt else apio_env.target + ".vlt",
-        map_params(lib_files, '"{}"'),
+        map_params(lib_dirs, '-I"{}"') if lint_whole_project else "",
+        apio_env.target + ".vlt" if using_vlt else "",
+        map_params(lib_files, '"{}"') if lint_whole_project else "",
     )
 
     return [source_files_issue_scanner_action(), action]

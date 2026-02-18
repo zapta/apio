@@ -126,6 +126,7 @@ message LintParams {
   repeated string verilator_warns = 5;
   optional bool nosynth = 6 [default = false];
   optional bool novlt = 7 [default = false];
+  repeated string file_names = 8;  // Is specified, lint only these files.
 }
 
 // Graph target specific params.
