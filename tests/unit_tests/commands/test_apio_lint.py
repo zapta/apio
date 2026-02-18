@@ -4,7 +4,7 @@ from tests.conftest import ApioRunner
 from apio.commands.apio import apio_top_cli as apio
 
 
-def test_lint_apio_init(apio_runner: ApioRunner):
+def test_lint_no_apio_ini(apio_runner: ApioRunner):
     """Test: apio lint without an apio.ini project file."""
 
     with apio_runner.in_sandbox() as sb:

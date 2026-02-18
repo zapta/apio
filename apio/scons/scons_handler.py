@@ -276,7 +276,9 @@ class SconsHandler:
         # -- Create the builder and target of the config file creation.
         extra_dependencies = []
 
-        if not lint_params.novlt:
+        lint_whole_project = not lint_params.file_names
+        using_vlt = lint_whole_project and (not lint_params.novlt)
+        if using_vlt:
             # -- The auto generated verilator config file with supression
             # -- of some librariy warnings is enable.
             apio_env.builder(LINT_CONFIG_BUILDER, plugin.lint_config_builder())
@@ -291,10 +293,20 @@ class SconsHandler:
         # -- Create the builder and target the lint operation.
         apio_env.builder(LINT_BUILDER, plugin.lint_builder())
 
+        # -- Determine the files that will be linted. If specific files were
+        # -- not specified on the command line, we take all the source and
+        # -- testbench files in the project.
+        if lint_params.file_names:
+            files_to_lint = [
+                apio_env.scons_env.File(f) for f in lint_params.file_names
+            ]
+        else:
+            files_to_lint = synth_srcs + test_srcs
+
         lint_out_target = apio_env.builder_target(
             builder_id=LINT_BUILDER,
             target=apio_env.target,
-            sources=synth_srcs + test_srcs,
+            sources=files_to_lint,
             extra_dependencies=extra_dependencies,
         )
 

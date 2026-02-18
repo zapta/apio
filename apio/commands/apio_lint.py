@@ -75,9 +75,13 @@ The command 'apio lint' scans the project's source files and reports errors, \
 inconsistencies, and style violations. The command uses the Verilator tool, \
 which is included with the standard Apio installation.
 
+If specified files are not specified, the top module of the project and \
+its dependencies are linted.
+
 Examples:[code]
   apio lint
   apio lint -t my_module
+  apio lint file1.v file2.v
   apio lint --all
   apio lint --nosynth
   apio lint --novlt[/code]
@@ -95,6 +99,7 @@ synthesizable portion of the design. To lint code that is hidden by \
     help=APIO_LINT_HELP,
 )
 @click.pass_context
+@click.argument("files", nargs=-1, required=False)
 @nosynth_option
 @novlt_option
 @nostyle_option
@@ -110,6 +115,8 @@ synthesizable portion of the design. To lint code that is hidden by \
 @options.project_dir_option
 def cli(
     _: click.Context,
+    # Args
+    files,
     # Options
     nosynth: bool,
     novlt: bool,
@@ -151,6 +158,7 @@ def cli(
         verilator_warns=warns_list,
         nosynth=nosynth,
         novlt=novlt,
+        file_names=files,
     )
 
     assert lint_params.IsInitialized(), lint_params
