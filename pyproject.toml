@@ -45,7 +45,6 @@ requires = [
     'tinyfpgab==1.1.0',
     'tinyprog==1.0.21',
     'icefunprog==2.0.3',
-    'apycula==0.15',
     'apollo_fpga==1.1.1',
     'protobuf==6.33.0',
     'rich==14.0.0',
