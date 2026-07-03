@@ -7,7 +7,6 @@ import os
 from os.path import getsize
 from pathlib import Path
 from typing import cast
-import pytest
 from tests.conftest import ApioRunner
 from apio.commands.apio import apio_top_cli as apio
 
@@ -419,7 +418,6 @@ def test_project_gowin_system_verilog(apio_runner: ApioRunner):
     )
 
 
-@pytest.mark.skipif(is_not_linux, reason=ONLY_LINUX_MSG)
 def test_project_xilinx_local_dir(apio_runner: ApioRunner):
     """Tests building and testing a Xilinx project as the current working
     dir."""
@@ -433,7 +431,6 @@ def test_project_xilinx_local_dir(apio_runner: ApioRunner):
     )
 
 
-@pytest.mark.skipif(is_not_linux, reason=ONLY_LINUX_MSG)
 def test_project_xilinx_remote_dir(apio_runner: ApioRunner):
     """Tests building and testing an ice40 project from a remote dir, using
     the -p option."""
@@ -445,3 +442,6 @@ def test_project_xilinx_remote_dir(apio_runner: ApioRunner):
         bitstream="hardware.bit",
         report_item="PSEUDO_GND",
     )
+
+
+# TODO: Add a test of a system verilog xilinx example.
