@@ -64,6 +64,7 @@ def test_drivers_ubuntu_only(apio_runner: ApioRunner):
         result = sb.invoke_apio_cmd(apio, ["drivers", "install", "ftdi"])
         sb.assert_result_ok(result)
         print(result.output)
+        assert "xyz" in result.output
         # assert (
         #     "No driver installation is required on this platform"
         #     in result.output
