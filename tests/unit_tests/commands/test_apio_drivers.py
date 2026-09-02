@@ -51,13 +51,13 @@ def test_drivers_darwin_only(apio_runner: ApioRunner):
         )
 
 
-def test_drivers_ubuntu_only(apio_runner: ApioRunner):
+def test_drivers_linux_only(apio_runner: ApioRunner):
     """Tests the 'apio drivers' commands on linux platform."""
 
     with apio_runner.in_sandbox() as sb:
 
         # -- Skip this test if not running on a linux platform
-        if not apio_platforms.get_apio_platform().is_darwin:
+        if not apio_platforms.get_apio_platform().is_linux:
             pytest.skip("Ubuntu only test")
 
         # -- Run 'apio drivers install ftdi'
