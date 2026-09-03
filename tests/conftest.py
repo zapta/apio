@@ -631,6 +631,10 @@ class ApioRunner:
             sys.stdout.flush()
             sys.stderr.flush()
 
+    def is_on_github_workflow(self) -> bool:
+        """Returns True if running on a github workflow."""
+        return os.environ.get("GITHUB_ACTIONS") == "true"
+
 
 @pytest.fixture(scope="module")
 def apio_runner(request):

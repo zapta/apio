@@ -60,6 +60,11 @@ def test_drivers_linux_only(apio_runner: ApioRunner):
         if not apio_platforms.get_apio_platform().is_linux:
             pytest.skip("Ubuntu only test")
 
+        # -- Skip this test if not running on a github workflow. We need
+        # -- the github password-less sudo for this test to succeed.
+        if not apio_runner.is_on_github_workflow():
+            pytest.skip("Github workflow only test")
+
         # -- Run 'apio drivers install ftdi'
         result = sb.invoke_apio_cmd(apio, ["drivers", "install", "ftdi"])
         sb.assert_result_ok(result)
