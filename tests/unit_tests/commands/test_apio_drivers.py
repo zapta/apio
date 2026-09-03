@@ -100,13 +100,13 @@ def test_drivers_github_linux_only(apio_runner: ApioRunner):
         # )
 
 
-# def test_drivers_windows_only(apio_runner: ApioRunner):
-#     """Tests the 'apio drivers' commands on a windows platform."""
+def test_drivers_windows_only(apio_runner: ApioRunner):
+    """Tests the 'apio drivers' commands on a windows platform."""
 
-#     with apio_runner.in_sandbox() as sb:
+    with apio_runner.in_sandbox() as sb:
 
-#         # -- Skip this test if not running on a windows platform
-#         if not apio_platforms.get_apio_platform().is_windows:
-#             pytest.skip("Windows only test")
+        # -- Skip this test if not running on a windows platform
+        if not apio_platforms.get_apio_platform().is_windows:
+            pytest.skip("Windows only test")
 
-#         print("TODO: Implement something testable here")
+        print("TODO: Implement something testable here")
