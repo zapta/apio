@@ -82,7 +82,7 @@ jobs:
           pip install invoke
           invoke install-deps
 
-      - name: Dump system env
+      - name: Show system env
         run: |
           env | sort --ignore-case
 
