@@ -64,16 +64,13 @@ def test_drivers_linux_only(apio_runner: ApioRunner):
         result = sb.invoke_apio_cmd(apio, ["drivers", "install", "ftdi"])
         sb.assert_result_ok(result)
         print(result.output)
-        assert "xyz" in result.output
-        # assert (
-        #     "No driver installation is required on this platform"
-        #     in result.output
-        # )
+        assert "FTDI drivers installed" in result.output
 
         # -- Run 'apio drivers uninstall ftdi'
         result = sb.invoke_apio_cmd(apio, ["drivers", "uninstall", "ftdi"])
         sb.assert_result_ok(result)
         print(result.output)
+        assert "xyz" in result.output
         # assert (
         #     "No driver installation is required on this platform"
         #     in result.output
