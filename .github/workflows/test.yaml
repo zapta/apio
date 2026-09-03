@@ -82,6 +82,10 @@ jobs:
           pip install invoke
           invoke install-deps
 
+      - name: Dump system env
+        run: |
+          env | sort --ignore-case
+
       # TODO: Move the logic here to an Invoke task and use it instead.
       - name: Run Tests
         run: |
