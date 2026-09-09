@@ -8,7 +8,7 @@ import json
 import argparse
 from pathlib import Path
 from typing import List, Dict
-from scripts.janitor.apio_repos_crawler import CrawlResults, GithubReleaseRef
+from scripts.janitor.apio_repos_crawler import CrawlResults, GithubReleaseRef, PypiCrawl
 
 parser = argparse.ArgumentParser(description="Crawl apio repos")
 parser.add_argument(
