@@ -2,8 +2,6 @@
 Experimental program to collect information about Apio releases.
 """
 
-# pylint: disable=fixme
-
 # TODO: Change lists to dictionaries keyed by versions.
 # TODO: Include in apio BUILD-INFO.json list of supported platforms.
 # TODO: Allow to map from pypi to apio repo releases
@@ -46,6 +44,10 @@ class GithubReleaseRef:
     # -- The release tag, e.g. "2026-08-13"
     tag: str
 
+    def __post_init__(self):
+        """Assert repo is all lower case. Use 'fpgawars' and not 'FPGAWars'."""
+        assert self.repo == self.repo.lower(), self
+
     def __str__(self) -> str:
         """Human friendly representation of the object."""
         return self.repo + " #" + self.tag
@@ -62,7 +64,10 @@ class PypiReleaseCrawl:
     # -- The date on which the released for published on Pypi.
     published: date
 
-    apio_cli_release_tag: str
+    apio_cli_release: GithubReleaseRef
+
+    # apio_cli_release_repo
+    # apio_cli_release_tag: str
 
 
 @dataclass(frozen=True)
@@ -111,7 +116,9 @@ class VscodeMarketplaceCrawl:
 
 @dataclass(frozen=True)
 class RemoteConfigPackageCrawl:
-    """Crawling result of a single package configuration in a remote config file."""
+    """Crawling result of a single package configuration in a remote
+    config file.
+    """
 
     # -- Package repo and release tag
     package_release: GithubReleaseRef
@@ -135,7 +142,7 @@ class RemoteConfigFileCrawl:
 class RemoteConfigsCrawl:
     """Crawling results of all the remote config files."""
 
-    remote_configs: Dict[Version, RemoteConfigFileCrawl]
+    remote_configs: Dict[str, RemoteConfigFileCrawl]
 
 
 @dataclass(frozen=True)
@@ -167,7 +174,6 @@ def read_file_from_pypi_apio_release(
     )
 
     assert tarball_url, meta_url
-
 
     with urllib.request.urlopen(tarball_url, context=_SSL_CONTEXT) as resp:
         blob = resp.read()
@@ -242,7 +248,7 @@ def _crawl_pypi() -> PypiCrawl:
         # -- Extract the apio release that was used to publish this pypi
         # -- release.
         init_py_text = read_file_from_pypi_apio_release(
-           version_str, "apio/__init__.py"
+            version_str, "apio/__init__.py"
         )
 
         match = RELEASE_INFO_RE.search(init_py_text)
@@ -251,7 +257,8 @@ def _crawl_pypi() -> PypiCrawl:
         # -- Append the release to the result list.
         assert str(version) not in releases
         releases[str(version)] = PypiReleaseCrawl(
-            publishing_time.date(), apio_cli_tag
+            publishing_time.date(),
+            GithubReleaseRef("fpgawars/apio", apio_cli_tag),
         )
 
     # -- Sort in place in decreasing semantic version key.
@@ -285,16 +292,16 @@ _MICROSOFT_PRE_RELEASE = "Microsoft.VisualStudio.Code.PreRelease"
 
 
 # -- Regex to extract the value of APIO_CLI_RELEASE_REPO from constants.js.
-_REPO_RE = re.compile(
-    r'^\s*const\s+APIO_CLI_RELEASE_REPO\s*=\s*"([^"]*)"\s*;\s*$',
-    re.MULTILINE,
-)
+# _REPO_RE = re.compile(
+#     r'^\s*const\s+APIO_CLI_RELEASE_REPO\s*=\s*"([^"]*)"\s*;\s*$',
+#     re.MULTILINE,
+# )
 
-# -- Regex to extract the value of APIO_CLI_RELEASE_TAG from constants.js.
-_TAG_RE = re.compile(
-    r'^\s*const\s+APIO_CLI_RELEASE_TAG\s*=\s*"([^"]*)"\s*;\s*$',
-    re.MULTILINE,
-)
+# # -- Regex to extract the value of APIO_CLI_RELEASE_TAG from constants.js.
+# _TAG_RE = re.compile(
+#     r'^\s*const\s+APIO_CLI_RELEASE_TAG\s*=\s*"([^"]*)"\s*;\s*$',
+#     re.MULTILINE,
+# )
 
 
 def _crawl_vscode_marketplace() -> VscodeMarketplaceCrawl:
@@ -302,7 +309,10 @@ def _crawl_vscode_marketplace() -> VscodeMarketplaceCrawl:
 
     # pylint: disable=too-many-locals
 
-    query_url = "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery"
+    query_url = (
+        "https://marketplace.visualstudio.com/"
+        + "_apis/public/gallery/extensionquery"
+    )
 
     flags = (
         _FLAG_INCLUDE_VERSIONS
