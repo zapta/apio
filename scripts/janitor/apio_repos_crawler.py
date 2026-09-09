@@ -24,7 +24,7 @@ import json5
 import certifi
 from packaging.version import Version
 
-parser = argparse.ArgumentParser(description="Crawl apio repos")
+parser = argparse.ArgumentParser(description="Apio Repos Janitor's crawl phase.")
 parser.add_argument(
     "--work-dir",
     type=Path,

@@ -42,7 +42,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # python ./scripts/janitor/apio_repos_crawler.py --work-dir ./_janitor
           python -m scripts.janitor.apio_repos_crawler --work-dir ./_janitor
 
       - name: Show crawl results
@@ -53,9 +52,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # python ./scripts/janitor/apio_repos_analyzer.py --work-dir ./_janitor
           python -m scripts.janitor.apio_repos_analyzer --work-dir ./_janitor
 
       - name: Show analysis results
         run: |
           cat ./_janitor/analysis_results.json
+
+      - name: Run the checker
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -m scripts.janitor.apio_repos_checker --work-dir ./_janitor
+
+      - name: Show check results
+        run: |
+          cat ./_janitor/check_results.json

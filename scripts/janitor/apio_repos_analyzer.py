@@ -20,7 +20,7 @@ from scripts.janitor.apio_repos_crawler import (
     RemoteConfigPackageCrawl
 )
 
-parser = argparse.ArgumentParser(description="Crawl apio repos")
+parser = argparse.ArgumentParser(description="Apio Repos Janitor's analysis phase.")
 parser.add_argument(
     "--work-dir",
     type=Path,

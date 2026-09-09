@@ -6,12 +6,21 @@ import os
 from dataclasses import asdict, dataclass
 import pickle
 import json
+import argparse
 from pathlib import Path
 from typing import List, Dict
 import requests
 from apio_repos_crawler import CrawlResults, crawl
 from apio_repos_analyzer import AnalysisResults, analyze
 
+parser = argparse.ArgumentParser(description="Apio Repos Janitor's check phase.")
+parser.add_argument(
+    "--work-dir",
+    type=Path,
+    default=Path("./_janitor"),
+    help="Janitor's temp data dir (default = ./_janitor)",
+)
+args = parser.parse_args()
 
 @dataclass(frozen=True)
 class CheckFailures:
@@ -164,34 +173,60 @@ def check(analysis_results: AnalysisResults) -> CheckResults:
 def main():
     """Main for testing."""
 
-    cache_file = Path("_crawl_cache.pkl")
 
-    if not cache_file.exists():
-        crawl_results: CrawlResults = crawl()
-        # pickle.dump(crawl_results, open(cache_file, "wb"))
-        with open(cache_file, "wb") as f:
-            pickle.dump(crawl_results, f)
+    # -- Get the work dir path.
+    work_dir_path = args.work_dir
+    print(f"work_dir = {str(work_dir_path)}")
 
-    # crawl_results = pickle.load(open(cache_file, "rb"))
+    # -- Load the crawler results
+    with open(work_dir_path / "analysis_results.pkl", "rb") as f:
+        analysis_results = pickle.load(f)
+    
 
-    with open(cache_file, "rb") as f:
-        crawl_results = pickle.load(f)
+    # -- Check
+    check_results: CheckResults = check(analysis_results)
+
+    # -- Write results as json, for human consumption.
+    (work_dir_path / "check_results.json").write_text(
+        json.dumps(asdict(check_results), indent=2, default=str),
+        encoding="utf-8",
+    )
+
+    # -- Write results as pickle, for consumption by next step.
+    with (work_dir_path / "check_results.pkl").open("wb") as f:
+        pickle.dump(check_results, f)
+
+
+
+
+    # cache_file = Path("_crawl_cache.pkl")
+
+    # if not cache_file.exists():
+    #     crawl_results: CrawlResults = crawl()
+    #     # pickle.dump(crawl_results, open(cache_file, "wb"))
+    #     with open(cache_file, "wb") as f:
+    #         pickle.dump(crawl_results, f)
+
+    # # crawl_results = pickle.load(open(cache_file, "rb"))
+
+    # with open(cache_file, "rb") as f:
+    #     crawl_results = pickle.load(f)
 
     # print("\nCrawl results:")
     # print(json.dumps(asdict(crawl_results), indent=2, default=str))
     # print()
 
-    analysis_results: AnalysisResults = analyze(crawl_results)
+    # analysis_results: AnalysisResults = analyze(crawl_results)
 
     # prin("\nAnalysis results:")
     # print(json.dumps(asdict(analysis_results), indent=2, default=str))
     # print()t
 
-    check_results: CheckResults = check(analysis_results)
+    # check_results: CheckResults = check(analysis_results)
 
-    print("\nCheck results:")
-    print(json.dumps(asdict(check_results), indent=2, default=str))
-    print()
+    # print("\nCheck results:")
+    # print(json.dumps(asdict(check_results), indent=2, default=str))
+    # print()
 
     # for repo in list(used_releases.keys()).sort():
     # for repo, tags in sorted(used_releases.items()):
