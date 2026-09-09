@@ -16,7 +16,8 @@ from scripts.janitor.apio_repos_crawler import (
     VscodeMarketplaceCrawl,
     VscodeReleaseCrawl,
     RemoteConfigsCrawl,
-    RemoteConfigFileCrawl
+    RemoteConfigFileCrawl,
+    RemoteConfigPackageCrawl
 )
 
 parser = argparse.ArgumentParser(description="Crawl apio repos")
