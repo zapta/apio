@@ -23,6 +23,12 @@ jobs:
         shell: bash
 
     steps:
+      # -- We need the apio repo for the janitor scripts.
+      - name: Checkout Apio's main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
       - name: Set up latest Python
         uses: actions/setup-python@v6
         with:
@@ -31,12 +37,6 @@ jobs:
       - name: Install python dependencies
         run: |
           pip install -r scripts/janitor/requirements.txt
-
-      # We need the apio repo for the janitor scripts.
-      - name: Checkout Apio's main branch
-        uses: actions/checkout@v4
-        with:
-          ref: main
 
       - name: Run the janitor crawler
         env:
