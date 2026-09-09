@@ -1,0 +1,45 @@
+# A periodic workflow to crawl, analyze, check, fix, and clean
+# Apio's repositories.
+
+name: apio-repos-janitor
+
+on:
+  # Run on commit.
+  push:
+
+  # Run every 6 hours
+  schedule:
+    - cron: "0 */6 * * *"
+
+  # Allow manual launch
+  workflow_dispatch:
+
+jobs:
+  janitor:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Set up latest Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Install python dependencies
+        run: |
+          pip install json5 requests
+
+      # We need the apio repo for the janitor scripts.
+      - name: Checkout Apio's main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Run the janitor crawler
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python ./scripts/janitor/apio_repos_crawler.py
