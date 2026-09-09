@@ -5,6 +5,7 @@ Experimental code to analyzer repos crawling results.
 from dataclasses import asdict, dataclass
 import pickle
 import json
+import argparse
 from pathlib import Path
 from typing import List, Dict
 from apio_repos_crawler import (
@@ -12,6 +13,15 @@ from apio_repos_crawler import (
     crawl,
     GithubReleaseRef,
 )
+
+parser = argparse.ArgumentParser(description="Crawl apio repos")
+parser.add_argument(
+    "--work-dir",
+    type=Path,
+    default=Path("./_janitor"),
+    help="Janitor's temp data dir (default = ./_janitor)",
+)
+args = parser.parse_args()
 
 
 @dataclass(frozen=True)
@@ -92,28 +102,47 @@ def analyze(crawl_results: CrawlResults) -> AnalysisResults:
 def main():
     """Main for testing."""
 
-    cache_file = Path("_crawl_cache.pkl")
+    # -- Get the work dir path.
+    work_dir_path = args.work_dir
+    print(f"work_dir = {str(work_dir_path)}")
 
-    if not cache_file.exists():
-        crawl_results: CrawlResults = crawl()
-        # pickle.dump(crawl_results, open(cache_file, "wb"))
-        with open(cache_file, "wb") as f:
-            pickle.dump(crawl_results, f)
+    # -- Load the crawler results
+    with open(work_dir_path / "crawler_results.pkl", "rb") as f:
+        crawl_results = pickle.load(f)
+
+    # -- Analyze
+
+    # work_dir_path.mkdir(parents=True, exist_ok=True)
+
+    # cache_file = Path("_crawl_cache.pkl")
+
+    # if not cache_file.exists():
+    #     crawl_results: CrawlResults = crawl()
+    #     # pickle.dump(crawl_results, open(cache_file, "wb"))
+    #     with open(cache_file, "wb") as f:
+    #         pickle.dump(crawl_results, f)
 
     # crawl_results = pickle.load(open(cache_file, "rb"))
-
-    with open(cache_file, "rb") as f:
-        crawl_results = pickle.load(f)
 
     # print("\nCrawl results:")
     # print(json.dumps(asdict(crawl_results), indent=2, default=str))
     # print()
 
-    analyze_results: AnalysisResults = analyze(crawl_results)
+    analysis_results: AnalysisResults = analyze(crawl_results)
 
-    print("\nAnalysis results:")
-    print(json.dumps(asdict(analyze_results), indent=2, default=str))
-    print()
+    # -- Write results as json, for human consumption.
+    (work_dir_path / "analysis_results.json").write_text(
+        json.dumps(asdict(analysis_results), indent=2, default=str),
+        encoding="utf-8",
+    )
+
+    # -- Write results as pickle, for consumption by next step.
+    with (work_dir_path / "analysis_results.pkl").open("wb") as f:
+        pickle.dump(analysis_results, f)
+
+    # print("\nAnalysis results:")
+    # print(json.dumps(asdict(analyze_results), indent=2, default=str))
+    # print()
 
     # for repo in list(used_releases.keys()).sort():
     # for repo, tags in sorted(used_releases.items()):

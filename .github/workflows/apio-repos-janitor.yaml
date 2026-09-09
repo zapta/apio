@@ -38,7 +38,7 @@ jobs:
         run: |
           pip install -r scripts/janitor/requirements.txt
 
-      - name: Run the janitor crawler
+      - name: Run the crawler
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -47,3 +47,13 @@ jobs:
       - name: Show crawl results
         run: |
           cat ./_janitor/crawl_results.json
+
+      - name: Run the analyzer
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python ./scripts/janitor/apio_repos_analyzer.py --work-dir ./_janitor
+
+      - name: Show analysis results
+        run: |
+          cat ./_janitor/analysis_results.json
