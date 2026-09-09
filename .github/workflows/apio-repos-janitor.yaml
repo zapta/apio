@@ -42,4 +42,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python ./scripts/janitor/apio_repos_crawler.py
+          python ./scripts/janitor/apio_repos_crawler.py --work-dir" ./_janitor
+
+      - name: Show crawl results
+        run: |
+          cat ./_janitor/crawl_results.json
