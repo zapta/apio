@@ -10,8 +10,8 @@ import argparse
 from pathlib import Path
 from typing import List, Dict
 import requests
-from apio_repos_crawler import CrawlResults, crawl
-from apio_repos_analyzer import AnalysisResults, analyze
+from scripts.janitor.apio_repos_crawler import CrawlResults
+from scripts.janitor.apio_repos_analyzer import AnalysisResults
 
 parser = argparse.ArgumentParser(description="Apio Repos Janitor's check phase.")
 parser.add_argument(
