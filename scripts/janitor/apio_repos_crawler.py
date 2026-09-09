@@ -9,9 +9,12 @@ Experimental program to collect information about Apio releases.
 import re
 import json
 import tarfile
+import pickle
 import urllib.request
+from pathlib import Path
 from typing import List, Dict
 from datetime import datetime, date
+import argparse
 from urllib.request import Request, urlopen
 import ssl
 from dataclasses import dataclass, asdict
@@ -20,6 +23,15 @@ from zipfile import ZipFile
 import json5
 import certifi
 from packaging.version import Version
+
+parser = argparse.ArgumentParser(description="Crawl apio repos")
+parser.add_argument(
+    "--work-dir",
+    type=Path,
+    default=Path("./_janitor"),
+    help="Janitor's temp data dir (default = ./_janitor)",
+)
+args = parser.parse_args()
 
 # APIO_PLATFORMS = ["darwin-arm64", "linux-x86-64", "windows-amd64"]
 
@@ -528,10 +540,23 @@ def crawl() -> CrawlResults:
 def main():
     """Main function."""
 
-    crawl_results = crawl()
-    print("\nCrawl results:")
-    print(json.dumps(asdict(crawl_results), indent=2, default=str))
-    print()
+    # -- Get the work dir path.
+    work_dir_path = args.work_dir
+    print(f"work_dir = {str(work_dir_path)}")
+    work_dir_path.mkdir(parents=True, exist_ok=True)
+
+    # -- Do the crawling.
+    crawl_results: CrawlResults = crawl()
+
+    # -- Write results as json, for human consumption.
+    (work_dir_path / "crawl_results.json").write_text(
+        json.dumps(asdict(crawl_results), indent=2, default=str),
+        encoding="utf-8",
+    )
+
+    # -- Write results as pickle, for consumption by next step.
+    with (work_dir_path / "crawl_results.pkl").open("wb") as f:
+        pickle.dump(crawl_results, f)
 
 
 if __name__ == "__main__":
