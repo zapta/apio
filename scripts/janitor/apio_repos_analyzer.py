@@ -10,7 +10,8 @@ from pathlib import Path
 from typing import List, Dict
 from apio_repos_crawler import (
     CrawlResults,
-    crawl,
+    PypiCrawl,
+    VscodeMarketplaceCrawl,
     GithubReleaseRef,
 )
 
