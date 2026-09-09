@@ -8,8 +8,8 @@ on:
   push:
 
   # Run every 6 hours
-  schedule:
-    - cron: "0 */6 * * *"
+  # schedule:
+  #   - cron: "0 */6 * * *"
 
   # Allow manual launch
   workflow_dispatch:
@@ -30,7 +30,7 @@ jobs:
 
       - name: Install python dependencies
         run: |
-          pip install json5 requests
+          pip install -r scripts/janitor/requirements.txt
 
       # We need the apio repo for the janitor scripts.
       - name: Checkout Apio's main branch

@@ -9,8 +9,8 @@ import json
 from pathlib import Path
 from typing import List, Dict
 import requests
-from scripts.janitor.apio_repos_crawler import CrawlResults, crawl
-from scripts.janitor.apio_repos_analyzer import AnalysisResults, analyze
+from apio_repos_crawler import CrawlResults, crawl
+from apio_repos_analyzer import AnalysisResults, analyze
 
 
 @dataclass(frozen=True)

@@ -7,7 +7,7 @@ import pickle
 import json
 from pathlib import Path
 from typing import List, Dict
-from scripts.janitor.apio_repos_crawler import (
+from apio_repos_crawler import (
     CrawlResults,
     crawl,
     GithubReleaseRef,
