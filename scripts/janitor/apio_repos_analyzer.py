@@ -107,7 +107,7 @@ def main():
     print(f"work_dir = {str(work_dir_path)}")
 
     # -- Load the crawler results
-    with open(work_dir_path / "crawler_results.pkl", "rb") as f:
+    with open(work_dir_path / "crawl_results.pkl", "rb") as f:
         crawl_results = pickle.load(f)
 
     # -- Analyze
