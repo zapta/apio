@@ -122,7 +122,7 @@ def download_release_metadata(
         headers={
             "Accept": "application/vnd.github+json",
             "User-Agent": "apio-script",
-            **github_headers,
+            **github_headers(),
         },
     )
 
