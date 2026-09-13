@@ -15,34 +15,45 @@ def analyze(crawl_results: models.CrawlResults) -> models.AnalysisResults:
     """Analyze crawling results and generate requirements report."""
 
     # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
 
     # -- A container for the requirements that the analyzer generates.
     # requirements = models.JanitorRequirements({}, {}, {})
     requirements = models.JanitorRequirements.make_empty()
 
+    # -- Populate release_should_be_stable
+
+    # -- The apio release of each PyPi release should be stable
+    for _, rc in crawl_results.pypi_crawl.releases.items():
+        requirements.release_should_be_stable.add(
+            rc.apio_cli_release, may_exists=False
+        )
+
     # -- Each vscode release and the cli releases that it refers to should
     # -- be stable.
     for _, rc in crawl_results.vscode_marketplace_crawl.releases.items():
-        requirements.should_be_stable.add(
+        requirements.release_should_be_stable.add(
             rc.apio_vscode_release, may_exists=False
         )
-        requirements.should_be_stable.add(
+        requirements.release_should_be_stable.add(
             rc.apio_cli_release, may_exists=False
         )
 
     # -- All packages that are refereed by a remote config should be stable.
     for _, rc in crawl_results.remote_configs_crawl.remote_configs.items():
         for _, package in rc.packages.items():
-            requirements.should_be_stable.add(
+            requirements.release_should_be_stable.add(
                 package.package_release, may_exists=True
             )
+
+    # -- Populate release_should_be_latest
 
     # -- The apio vscode release of the latest vscode market release should
     # -- be marked as latest.
     vscode_crawl = crawl_results.vscode_marketplace_crawl
     vscode_latest_release = vscode_crawl.releases[str(vscode_crawl.latest)]
     # apio_vscode_latest_release = vscode_latest_release.apio_vscode_release
-    requirements.should_be_latest.add(
+    requirements.release_should_be_latest.add(
         vscode_latest_release.apio_vscode_release, may_exists=False
     )
 
@@ -51,7 +62,7 @@ def analyze(crawl_results: models.CrawlResults) -> models.AnalysisResults:
     pypi_crawl = crawl_results.pypi_crawl
     pypi_latest_release = pypi_crawl.releases[str(pypi_crawl.latest)]
     # apio_cli_latest_release = pypi_latest_release.apio_cli_release
-    requirements.should_be_latest.add(
+    requirements.release_should_be_latest.add(
         pypi_latest_release.apio_cli_release, may_exists=False
     )
 
@@ -64,11 +75,23 @@ def analyze(crawl_results: models.CrawlResults) -> models.AnalysisResults:
         latest_remote_config_key
     ]
     for _, package in latest_remote_config.packages.items():
-        requirements.should_be_latest.add(
+        requirements.release_should_be_latest.add(
             package.package_release, may_exists=False
         )
 
-    # -- Identify the old prereleases that should be deleted.
+    # -- Populate release_should_be_consistent
+
+    # -- For now we select only the stable openxc7 release.
+    openxc7_repo = "tools-openxc7"
+    assert openxc7_repo in consts.APIO_REPOS
+    for release in requirements.release_should_be_stable.repo_releases(
+        openxc7_repo
+    ):
+        requirements.release_should_be_consistent.add(
+            release, may_exists=False
+        )
+
+    # -- Populate draft_should_be_deleted and pre_release_should_be_deleted.
 
     today: date = date.today()
     for repo, repo_crawl in crawl_results.repos_crawl.repos.items():
@@ -79,7 +102,7 @@ def analyze(crawl_results: models.CrawlResults) -> models.AnalysisResults:
             release = models.GithubReleaseRef(repo, release_tag)
 
             # -- Case 1: Release is in use.
-            if release in requirements.should_be_stable:
+            if release in requirements.release_should_be_stable:
                 continue
 
             # -- Case 2: Release is a draft.

@@ -48,7 +48,7 @@ def verify(
 
     # -- Iterate the 'should be stable' requirements and partition them to
     # -- success and failures.
-    for repo, releases in requirements.should_be_stable.items():
+    for repo, releases in requirements.release_should_be_stable.items():
         # -- Get the garbage releases of this repo.
         # -- We expect the repo to be in the crawling data.
         repo_crawl: models.RepoCrawl = fresh_repo_crawl.repos[repo]
@@ -67,13 +67,17 @@ def verify(
 
             # -- Save this requirement as a success or failure.
             if is_stable:
-                successes.should_be_stable.add(release, may_exists=False)
+                successes.release_should_be_stable.add(
+                    release, may_exists=False
+                )
             else:
-                failures.should_be_stable.add(release, may_exists=False)
+                failures.release_should_be_stable.add(
+                    release, may_exists=False
+                )
 
     # -- Iterate the 'should be latest' requirements and partition them to
     # -- success and failures.
-    for repo, releases in requirements.should_be_latest.items():
+    for repo, releases in requirements.release_should_be_latest.items():
         # -- Get the garbage releases of this repo.
         # -- We expect the repo to be in the crawling data.
         repo_crawl: models.RepoCrawl = fresh_repo_crawl.repos[repo]
@@ -92,10 +96,14 @@ def verify(
 
             # -- Save this requirement as a success or failure.
             if is_latest:
-                successes.should_be_latest.add(release, may_exists=False)
+                successes.release_should_be_latest.add(
+                    release, may_exists=False
+                )
 
             else:
-                failures.should_be_latest.add(release, may_exists=False)
+                failures.release_should_be_latest.add(
+                    release, may_exists=False
+                )
 
     # TODO: The logic of verifying the draft and the releases are very
     # similar, consider to refactor to a shared method.
@@ -177,16 +185,16 @@ def _generate_markdown_report(
     lines.append("**Error founds**")
 
     # fmt: off
-    sections = {
-        "Releases should be stable":
-            failures.should_be_stable,
-        "Releases should be 'latest'":
-            failures.should_be_latest,
-        "Obsolete draft releases and tags":
-            failures.draft_should_be_deleted,
-        "Obsolete pre-releases and tags":
-            failures.pre_release_should_be_deleted,
-    }
+    # sections = {
+    #     "Releases should be stable":
+    #         failures.should_be_stable,
+    #     "Releases should be 'latest'":
+    #         failures.should_be_latest,
+    #     "Obsolete draft releases and tags":
+    #         failures.draft_should_be_deleted,
+    #     "Obsolete pre-releases and tags":
+    #         failures.pre_release_should_be_deleted,
+    # }
     # fmt: on
 
     # -- Generate a report section for each repo.
@@ -194,7 +202,9 @@ def _generate_markdown_report(
         lines.append("\n<br>\n")
         lines.append(f"**{repo}**")
 
-        for title, release_set in sections.items():
+        # for title, release_set in sections.items():
+        for field_name, release_set in failures.release_sets():
+            title = field_name.replace("_", " ").capitalize()
             releases = release_set.repo_releases(repo)
             if not releases:
                 continue
