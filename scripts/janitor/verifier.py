@@ -5,9 +5,10 @@ write the results to a file and generated a human readable markdown
 report.
 """
 
-from typing import Optional, List
+from typing import Optional, List, Set
 from dataclasses import asdict, dataclass
 import pickle
+import json
 import argparse
 from pathlib import Path
 from scripts.janitor import models, crawler, util
@@ -30,6 +31,8 @@ def verify(
     """Verifies that the analyzer requirements where fixed."""
 
     # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
 
     # -- Perform a fresh crawl of the repos.
     fresh_repo_crawl: models.ReposCrawl = crawler.crawl_apio_repos()
@@ -96,6 +99,51 @@ def verify(
 
             else:
                 failures.release_should_be_latest.add(release)
+
+    # -- Process the release_should_be_consistent requirements.
+
+    for repo, releases in requirements.release_should_be_consistent.items():
+        assert repo == "fpgawars/tools-openxc7", repo
+        for release in releases:
+            # -- Older version didn't have the parts index so we just
+            # -- assume they are ok.
+            if release.tag < "2026-09-10":
+                successes.release_should_be_consistent.add(release)
+                continue
+
+            print(f"Checking consistency of release {release}")
+
+            # -- Get the parts index and collect the chipdb file names.
+            json_bytes = util.download_release_asset(
+                release, "XILINX-PARTS-INDEX.json"
+            )
+            index = json.loads(json_bytes)
+            index_chipdbs: Set[str] = set()
+            for part in index["parts"].values():
+                chipdb_asset = part.get("asset", None)
+                if chipdb_asset:
+                    index_chipdbs.add(chipdb_asset)
+            print(f"index_chipdbs has {len(index_chipdbs)} members.")
+
+            # -- Get the release metadata and collects the asset chipdb
+            release_metadata = util.download_release_metadata(release)
+            assets_chipdbs: Set[str] = set()
+            for asset_name in release_metadata.assets.keys():
+                if asset_name.startswith("apio-xilinx-chipdb-"):
+                    assets_chipdbs.add(asset_name)
+            print(f"assets_chipdbs has {len(assets_chipdbs)} members.")
+
+            # -- The two sets should be identical
+            ok = index_chipdbs == assets_chipdbs
+            if ok:
+                successes.release_should_be_consistent.add(release)
+            else:
+                only_in_index = sorted(index_chipdbs - assets_chipdbs)
+                only_in_assets = sorted(assets_chipdbs - index_chipdbs)
+                print(f"*** Release {release} chipdb mismatch")
+                print(f"{only_in_index=}")
+                print(f"{only_in_assets=}")
+                failures.release_should_be_consistent.add(release)
 
     # TODO: The logic of verifying the draft and the releases are very
     # similar, consider to refactor to a shared method.
