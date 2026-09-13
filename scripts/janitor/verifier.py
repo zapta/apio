@@ -237,7 +237,7 @@ def _generate_markdown_report(
         lines.append(f"**{repo}**")
 
         # for title, release_set in sections.items():
-        for field_name, release_set in failures.release_sets():
+        for field_name, release_set in failures.release_sets().items():
             title = field_name.replace("_", " ").capitalize()
             releases = release_set.repo_releases(repo)
             if not releases:
