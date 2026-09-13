@@ -67,13 +67,9 @@ def verify(
 
             # -- Save this requirement as a success or failure.
             if is_stable:
-                successes.release_should_be_stable.add(
-                    release, may_exists=False
-                )
+                successes.release_should_be_stable.add(release)
             else:
-                failures.release_should_be_stable.add(
-                    release, may_exists=False
-                )
+                failures.release_should_be_stable.add(release)
 
     # -- Iterate the 'should be latest' requirements and partition them to
     # -- success and failures.
@@ -96,14 +92,10 @@ def verify(
 
             # -- Save this requirement as a success or failure.
             if is_latest:
-                successes.release_should_be_latest.add(
-                    release, may_exists=False
-                )
+                successes.release_should_be_latest.add(release)
 
             else:
-                failures.release_should_be_latest.add(
-                    release, may_exists=False
-                )
+                failures.release_should_be_latest.add(release)
 
     # TODO: The logic of verifying the draft and the releases are very
     # similar, consider to refactor to a shared method.
@@ -124,11 +116,9 @@ def verify(
             )
             # -- Save this requirement as a success or failure.
             if release_crawl is None:
-                successes.draft_should_be_deleted.add(
-                    release, may_exists=False
-                )
+                successes.draft_should_be_deleted.add(release)
             else:
-                failures.draft_should_be_deleted.add(release, may_exists=False)
+                failures.draft_should_be_deleted.add(release)
 
     # -- Iterate the 'pre_release_should_be_deleted' requirements and
     # -- partition them to success and failures.
@@ -146,13 +136,9 @@ def verify(
             )
             # -- Save this requirement as a success or failure.
             if release_crawl is None:
-                successes.pre_release_should_be_deleted.add(
-                    release, may_exists=False
-                )
+                successes.pre_release_should_be_deleted.add(release)
             else:
-                failures.pre_release_should_be_deleted.add(
-                    release, may_exists=False
-                )
+                failures.pre_release_should_be_deleted.add(release)
 
     # -- Check that the requirements from the analyzer are properly
     # -- partitioned among the failures and successes.

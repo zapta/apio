@@ -25,26 +25,19 @@ def analyze(crawl_results: models.CrawlResults) -> models.AnalysisResults:
 
     # -- The apio release of each PyPi release should be stable
     for _, rc in crawl_results.pypi_crawl.releases.items():
-        requirements.release_should_be_stable.add(
-            rc.apio_cli_release, may_exists=False
-        )
+        print(f"{rc=}")
+        requirements.release_should_be_stable.add(rc.apio_cli_release)
 
     # -- Each vscode release and the cli releases that it refers to should
     # -- be stable.
     for _, rc in crawl_results.vscode_marketplace_crawl.releases.items():
-        requirements.release_should_be_stable.add(
-            rc.apio_vscode_release, may_exists=False
-        )
-        requirements.release_should_be_stable.add(
-            rc.apio_cli_release, may_exists=False
-        )
+        requirements.release_should_be_stable.add(rc.apio_vscode_release)
+        requirements.release_should_be_stable.add(rc.apio_cli_release)
 
     # -- All packages that are refereed by a remote config should be stable.
     for _, rc in crawl_results.remote_configs_crawl.remote_configs.items():
         for _, package in rc.packages.items():
-            requirements.release_should_be_stable.add(
-                package.package_release, may_exists=True
-            )
+            requirements.release_should_be_stable.add(package.package_release)
 
     # -- Populate release_should_be_latest
 
@@ -54,7 +47,7 @@ def analyze(crawl_results: models.CrawlResults) -> models.AnalysisResults:
     vscode_latest_release = vscode_crawl.releases[str(vscode_crawl.latest)]
     # apio_vscode_latest_release = vscode_latest_release.apio_vscode_release
     requirements.release_should_be_latest.add(
-        vscode_latest_release.apio_vscode_release, may_exists=False
+        vscode_latest_release.apio_vscode_release
     )
 
     # -- The cli release that is the latest on pypi should be latest in the
@@ -63,7 +56,7 @@ def analyze(crawl_results: models.CrawlResults) -> models.AnalysisResults:
     pypi_latest_release = pypi_crawl.releases[str(pypi_crawl.latest)]
     # apio_cli_latest_release = pypi_latest_release.apio_cli_release
     requirements.release_should_be_latest.add(
-        pypi_latest_release.apio_cli_release, may_exists=False
+        pypi_latest_release.apio_cli_release
     )
 
     # -- The apio packages releases that are referred by the remote config
@@ -75,9 +68,7 @@ def analyze(crawl_results: models.CrawlResults) -> models.AnalysisResults:
         latest_remote_config_key
     ]
     for _, package in latest_remote_config.packages.items():
-        requirements.release_should_be_latest.add(
-            package.package_release, may_exists=False
-        )
+        requirements.release_should_be_latest.add(package.package_release)
 
     # -- Populate release_should_be_consistent
 
@@ -87,9 +78,7 @@ def analyze(crawl_results: models.CrawlResults) -> models.AnalysisResults:
     for release in requirements.release_should_be_stable.repo_releases(
         openxc7_repo
     ):
-        requirements.release_should_be_consistent.add(
-            release, may_exists=False
-        )
+        requirements.release_should_be_consistent.add(release)
 
     # -- Populate draft_should_be_deleted and pre_release_should_be_deleted.
 
@@ -111,9 +100,7 @@ def analyze(crawl_results: models.CrawlResults) -> models.AnalysisResults:
                 draft_age_days = (today - draft_date).days
                 # -- Mark for deletion if too old.
                 if draft_age_days > consts.MAX_DRAFT_AGE_DAYS:
-                    requirements.draft_should_be_deleted.add(
-                        release, may_exists=False
-                    )
+                    requirements.draft_should_be_deleted.add(release)
                 continue
 
             # -- Case 3: Release is a pre-release.
@@ -125,9 +112,7 @@ def analyze(crawl_results: models.CrawlResults) -> models.AnalysisResults:
                     prereleases_kept += 1
                 else:
                     # -- Mark the for deletion if too many.
-                    requirements.pre_release_should_be_deleted.add(
-                        release, may_exists=False
-                    )
+                    requirements.pre_release_should_be_deleted.add(release)
                 continue
 
             # -- Case 4: Any other release. Do nothing.

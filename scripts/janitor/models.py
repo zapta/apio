@@ -99,7 +99,7 @@ class ReleaseSet:
         """Return a list of the releases of a single repo."""
         return self._repos.get(repo, set())
 
-    def add(self, release: GithubReleaseRef, *, may_exists: False) -> None:
+    def add(self, release: GithubReleaseRef) -> None:
         """Add a release reference to the set."""
         repo = release.repo
         # -- Case 1: This is the first for this repo.
@@ -107,10 +107,7 @@ class ReleaseSet:
             self._repos[repo] = set([release])
             return
         # -- Case 2: Repo already has at least one release.
-        release_set = self._repos[repo]
-        if not may_exists and release in release_set:
-            raise ValueError(f"Release {release} already in set.")
-        release_set.add(release)
+        self._repos[repo].add(release)
 
     def as_dict(self) -> Dict[str, Set[GithubReleaseRef]]:
         """Converts to a dict of repo -> release_ref."""
