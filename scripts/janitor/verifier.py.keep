@@ -26,7 +26,8 @@ class ReleaseStatus:
 
 
 def _is_openxc7_release_consistent(release: models.GithubReleaseRef) -> bool:
-    """Returns True if given openxc7 release is consistent, False otherwise."""
+    """Returns True if given openxc7 release is consistent, 
+    False otherwise."""
 
     assert release.repo == "fpgawars/tools-openxc7", release
     # for release in releases:
