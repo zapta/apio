@@ -173,7 +173,7 @@ jobs:
           # pushd _dist
           pushd _apio-repo
           package="apio-pypi-package-${PACKAGE_TAG}.tgz"
-          tar zcf ../${bundle} dist
+          tar zcf ../${package} dist
           popd
 
       # - name: Publish to PyPi
