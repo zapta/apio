@@ -152,7 +152,7 @@ jobs:
 
       - name: Copy build info to apio
         run: |
-          cp ./BUILD-INFO.json ./_apio_repo/apio
+          cp ./BUILD-INFO.json ./_apio-repo/apio
 
       - name: Build the package in dist dir
         run: |
