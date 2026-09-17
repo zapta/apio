@@ -17,7 +17,6 @@ env:
   # The Python version of the pyinstaller binaries.
   PYTHON_VERSION: "3.14"
 
-
   # Apio repo branch to use.
   APIO_TARGET_BRANCH: ${{github.event.inputs.apio_branch || 'main'}}
 
@@ -120,8 +119,6 @@ jobs:
     uses: ./.github/workflows/build-darwin-arm64.yaml
     secrets: inherit
 
-
-
   build-linux-x86-64:
     needs: prepare
     uses: ./.github/workflows/build-linux-x86-64.yaml
@@ -132,11 +129,23 @@ jobs:
     uses: ./.github/workflows/build-windows-amd64.yaml
     secrets: inherit
 
+  build-pypi-package:
+    needs: prepare
+    uses: ./.github/workflows/build-pypi-package.yaml
+    secrets: inherit
+
   # # ----- Create the pre-release with the generated files.
 
   pre-release:
     needs:
-      [prepare, build-darwin-arm64, prepare, build-linux-x86-64, build-windows-amd64]
+      [
+        prepare,
+        build-darwin-arm64,
+        prepare,
+        build-linux-x86-64,
+        build-windows-amd64,
+        build-pypi-package,
+      ]
 
     runs-on: ubuntu-latest
     permissions:
