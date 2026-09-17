@@ -40,17 +40,17 @@ jobs:
           mv _artifacts/BUILD-INFO.json .
           cat -n BUILD-INFO.json
 
-      - name: Add platform info to build info json file
-        uses: fpgawars/apio-workflows/.github/actions/write-to-json-file@main
-        with:
-          json-file: BUILD-INFO.json
-          key: target-platform
-          value: linux-x86-64
+      # - name: Add platform info to build info json file
+      #   uses: fpgawars/apio-workflows/.github/actions/write-to-json-file@main
+      #   with:
+      #     json-file: BUILD-INFO.json
+      #     key: target-platform
+      #     value: linux-x86-64
 
-      - name: Format build info json file
-        uses: fpgawars/apio-workflows/.github/actions/format-json-file@main
-        with:
-          json-file: BUILD-INFO.json
+      # - name: Format build info json file
+      #   uses: fpgawars/apio-workflows/.github/actions/format-json-file@main
+      #   with:
+      #     json-file: BUILD-INFO.json
 
       - name: Set env vars from JSON
         uses: fpgawars/apio-workflows/.github/actions/set-env-from-json@main
@@ -141,12 +141,16 @@ jobs:
           cat >> pyproject.toml << 'EOF'
 
           [tool.apio-release]
-          repo = "${{ github.repository }}"
-          tag = "${{ inputs.release_tag }}"
-          commit = "${{ env.RELEASE_COMMIT_SHA }}"
+          repo = "${{ env.APIO_REPO }}"
+          tag = "${{ env.RELEASE_TAG }}"
+          commit = "${{ env.APIO_COMMIT }}"
           EOF
 
           cat -n pyproject.toml
+
+      - name: Copy build info to apio
+        run: |
+          cp ./BUILD-INFO.json ./apio
 
       - name: Build the package
         run: |
