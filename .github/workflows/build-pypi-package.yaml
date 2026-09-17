@@ -170,6 +170,11 @@ jobs:
 
       - name: List package's .tar.gz items
         run: |
+          echo "*** 1"
+          tar -tzf _apio-repo/dist/*.tar.gz 
+          echo "*** 2"
+          tar -tzf _apio-repo/dist/*.tar.gz | tree --fromfile .
+          echo "*** 3"
           tar -tzf _apio-repo/dist/*.tar.gz | tree --fromfile _apio-repo
 
 
