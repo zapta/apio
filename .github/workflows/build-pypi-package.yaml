@@ -159,13 +159,22 @@ jobs:
           cd _apio-repo
           python -m build
 
-      - name: List dist directory
+      - name: List package's dist directory
         run: |
           ls -al _apio-repo/dist
 
-      - name: List package items
+      - name: List package's .tar.gz items
         run: |
           tar -tzf _apio-repo/dist/*.tar.gz | tree --fromfile _apio-repo
+
+
+      - name: Compress the package's dist directory
+        run: |
+          # pushd _dist
+          pushd _apio-repo
+          package="apio-pypi-package-${PACKAGE_TAG}.tgz"
+          tar zcf ../${bundle} dist
+          popd
 
       # - name: Publish to PyPi
       #   env:
@@ -185,3 +194,10 @@ jobs:
       #   run: |
       #     # invoke publish
       #     flit publish
+
+      - name: Export the pypi package as an artifact
+        uses: actions/upload-artifact@v6
+        with:
+          if-no-files-found: error
+          name: "apio-pypi-package"
+          path: "apio-pypi-package-${{env.PACKAGE_TAG}}.tgz"
