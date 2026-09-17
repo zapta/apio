@@ -154,6 +154,11 @@ jobs:
         run: |
           cp ./BUILD-INFO.json ./_apio-repo/apio
 
+      - name: List apio root files
+        run: |
+          ls -al ./_apio-repo
+          ls -al ./_apio-repo/apio
+
       - name: Build the package in dist dir
         run: |
           cd _apio-repo
