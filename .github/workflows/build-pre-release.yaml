@@ -294,4 +294,5 @@ jobs:
             _artifacts/apio-cli-linux-x86-64-${{env.PACKAGE_TAG}}-debian.deb
             _artifacts/apio-cli-windows-amd64-${{env.PACKAGE_TAG}}-bundle.zip
             _artifacts/apio-cli-windows-amd64-${{env.PACKAGE_TAG}}-installer.exe
+            _artifacts/apio-pypi-package-${{env.PACKAGE_TAG}}.tgz
             BUILD-INFO.json
