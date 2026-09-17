@@ -161,7 +161,7 @@ jobs:
 
       - name: List dist directory
         run: |
-          ls -al_apio-repo/dist
+          ls -al _apio-repo/dist
 
       - name: List package items
         run: |
