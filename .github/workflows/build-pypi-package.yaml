@@ -87,7 +87,7 @@ jobs:
       - name: Set apio release info
         uses: fpgawars/apio-workflows/.github/actions/set-apio-release-info@main
         with:
-          repo_path: _apio-repo
+          repo_path: .
           prefix: pypi
           release_tag: ${{env.RELEASE_TAG}}
 
