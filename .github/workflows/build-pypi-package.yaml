@@ -1,0 +1,177 @@
+name: build-pypi-package
+
+on:
+  workflow_call:
+
+env:
+  # These are set later.
+  TARGET_PLATFORM: ""
+  PYTHON_VERSION: ""
+  APIO_REPO: ""
+  APIO_COMMIT: ""
+  RELEASE_TAG: ""
+  PACKAGE_TAG: ""
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    defaults:
+      run:
+        shell: bash # Set Bash as the default shell
+
+    steps:
+      - name: Check required platform
+        uses: fpgawars/apio-workflows/.github/actions/check-platform@main
+        with:
+          os: linux
+          arch: x86_64
+
+      - name: Download BUILD-INFO.json artifact from main job
+        uses: actions/download-artifact@v8
+        with:
+          name: build-info
+          merge-multiple: true
+          path: _artifacts
+
+      - name: Move build info
+        run: |
+          find _artifacts
+          mv _artifacts/BUILD-INFO.json .
+          cat -n BUILD-INFO.json
+
+      - name: Add platform info to build info json file
+        uses: fpgawars/apio-workflows/.github/actions/write-to-json-file@main
+        with:
+          json-file: BUILD-INFO.json
+          key: target-platform
+          value: linux-x86-64
+
+      - name: Format build info json file
+        uses: fpgawars/apio-workflows/.github/actions/format-json-file@main
+        with:
+          json-file: BUILD-INFO.json
+
+      - name: Set env vars from JSON
+        uses: fpgawars/apio-workflows/.github/actions/set-env-from-json@main
+        with:
+          json-file: BUILD-INFO.json
+          mappings: >-
+            PYTHON_VERSION   apio-python-version
+            APIO_REPO        repo
+            APIO_COMMIT      repo-commit
+            APIO_VERSION     apio-cli-version
+            RELEASE_TAG      release-tag
+            PACKAGE_TAG      package-tag
+
+      # -- This is the python that will be included in pyinstaller.
+      - name: Install python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      # -- Install dependencies.
+      # --
+      # -- TODO: Using an old flit as a quick workaround for publishing
+      # -- failure in Apio issue 948. Find a more long term solution.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip build "flit<4" "flit_core<4"
+
+      - name: Checkout apio repo
+        uses: actions/checkout@v6
+        with:
+          repository: ${{env.APIO_REPO}}
+          ref: ${{env.APIO_COMMIT}}
+
+      - name: Set apio release info
+        uses: fpgawars/apio-workflows/.github/actions/set-apio-release-info@main
+        with:
+          repo_path: _apio-repo
+          prefix: pypi
+          release_tag: ${{env.RELEASE_TAG}}
+
+      # - name: Check that the release tag has yyyy-mm-dd format.
+      #   uses: fpgawars/apio-workflows/.github/actions/check-release-tag@main
+      #   with:
+      #     release-tag: ${{ inputs.release_tag }}
+
+      # - name: Check that the release is stable
+      #   uses: fpgawars/apio-workflows/.github/actions/check-release-is-stable@main
+      #   with:
+      #     release-repo: ${{ github.repository }}
+      #     release-tag: ${{ inputs.release_tag }}
+
+      # -- Checkout the main branch as the work directory.
+      # - name: Checkout Apio release ${{ inputs.release_tag }}
+      #   uses: actions/checkout@v6
+      #   with:
+      #     # Checks out the exact tag entered by the user
+      #     ref: ${{ inputs.release_tag }}
+
+      # - name: Get release commit sha.
+      #   run: |
+      #     release_commit_sha=$(git rev-parse HEAD)
+      #     echo "RELEASE_COMMIT_SHA=$release_commit_sha"
+      #     echo "RELEASE_COMMIT_SHA=$release_commit_sha" >> $GITHUB_ENV
+
+      # - name: Set release info string in apio/__init__.py
+      #   uses: fpgawars/apio-workflows/.github/actions/set-apio-release-info@main
+      #   with:
+      #     repo_path: .
+      #     prefix: pypi
+      #     release_tag: ${{ inputs.release_tag }}
+
+      # -- Install and and configure python
+      # - name: Set up Python
+      #   uses: actions/setup-python@v6
+      #   with:
+      #     python-version: "3.13"
+
+      # # -- Install dependencies.
+      # # --
+      # # -- TODO: Using an old flit as a quick workaround for publishing
+      # # -- failure in Apio issue 948. Find a more long term solution.
+      # - name: Install dependencies
+      #   run: |
+      #     python -m pip install --upgrade pip build "flit<4" "flit_core<4"
+
+      - name: Append Apio release info to pyproject.toml
+        run: |
+          cat >> pyproject.toml << 'EOF'
+
+          [tool.apio-release]
+          repo = "${{ github.repository }}"
+          tag = "${{ inputs.release_tag }}"
+          commit = "${{ env.RELEASE_COMMIT_SHA }}"
+          EOF
+
+          cat -n pyproject.toml
+
+      - name: Build the package
+        run: |
+          # Creates dist/*.tar.gz and dist/*.whl from pyproject.toml
+          python -m build
+
+      - name: List package items
+        run: |
+          tar -tzf dist/*.tar.gz | tree --fromfile .
+
+      # - name: Publish to PyPi
+      #   env:
+      #     # TODO: As of Dec 27 2025, PYPI_USERNAME and PYPI_PASSWORD
+      #     # contain a token rather than the actual username and
+      #     # password (good security). We copied PYPI_PASSWORD to
+      #     # PYPI_API_TOKEN and use a literal "__token__" instead
+      #     # of PYPI_USERNAME. Once this new configuration publishes
+      #     # successfully, the two secrets PYPI_USERNAME and PYPI_PASSWORD
+      #     # should be deleted for clarity.
+      #     #
+      #     # FLIT_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      #     # FLIT_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+
+      #     FLIT_USERNAME: __token__
+      #     FLIT_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      #   run: |
+      #     # invoke publish
+      #     flit publish
