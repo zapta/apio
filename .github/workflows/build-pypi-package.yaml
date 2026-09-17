@@ -5,7 +5,6 @@ on:
 
 env:
   # These are set later.
-  TARGET_PLATFORM: ""
   PYTHON_VERSION: ""
   APIO_REPO: ""
   APIO_COMMIT: ""
@@ -60,11 +59,11 @@ jobs:
 
       # -- Install dependencies.
       # --
-      # -- TODO: Using an old flit as a quick workaround for publishing
+      # -- TODO: Using an old flit_core as a quick workaround for publishing
       # -- failure in Apio issue 948. Find a more long term solution.
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip build "flit<4" "flit_core<4"
+          python -m pip install --upgrade pip "flit_core<4" "build"
 
       # We checkout the repo into a subdirectory not to step on BUILD-INFO.json.
       - name: Checkout apio repo
@@ -116,7 +115,7 @@ jobs:
         run: |
           tar -tzf _apio-repo/dist/*.tar.gz | tree --fromfile .
 
-      - name: Compress the package's dist directory
+      - name: Compress the dist directory
         run: |
           set -x
           pushd _apio-repo

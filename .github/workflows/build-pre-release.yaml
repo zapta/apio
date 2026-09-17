@@ -286,7 +286,8 @@ jobs:
         with:
           release_tag: ${{ env.RELEASE_TAG }}
           body_path: RELEASE-BODY.txt
-          # We intensionally list explicitly all the expected files.
+          # We intensionally list explicitly all the expected files rather
+          # then using file patterns.
           files: |
             _artifacts/apio-cli-darwin-arm64-${{env.PACKAGE_TAG}}-bundle.tgz
             _artifacts/apio-cli-darwin-arm64-${{env.PACKAGE_TAG}}-installer.pkg
