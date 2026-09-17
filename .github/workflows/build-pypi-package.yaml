@@ -40,18 +40,6 @@ jobs:
           mv _artifacts/BUILD-INFO.json .
           cat -n BUILD-INFO.json
 
-      # - name: Add platform info to build info json file
-      #   uses: fpgawars/apio-workflows/.github/actions/write-to-json-file@main
-      #   with:
-      #     json-file: BUILD-INFO.json
-      #     key: target-platform
-      #     value: linux-x86-64
-
-      # - name: Format build info json file
-      #   uses: fpgawars/apio-workflows/.github/actions/format-json-file@main
-      #   with:
-      #     json-file: BUILD-INFO.json
-
       - name: Set env vars from JSON
         uses: fpgawars/apio-workflows/.github/actions/set-env-from-json@main
         with:
@@ -93,54 +81,9 @@ jobs:
           prefix: pypi
           release_tag: ${{env.RELEASE_TAG}}
 
-      # - name: Check that the release tag has yyyy-mm-dd format.
-      #   uses: fpgawars/apio-workflows/.github/actions/check-release-tag@main
-      #   with:
-      #     release-tag: ${{ inputs.release_tag }}
-
-      # - name: Check that the release is stable
-      #   uses: fpgawars/apio-workflows/.github/actions/check-release-is-stable@main
-      #   with:
-      #     release-repo: ${{ github.repository }}
-      #     release-tag: ${{ inputs.release_tag }}
-
-      # -- Checkout the main branch as the work directory.
-      # - name: Checkout Apio release ${{ inputs.release_tag }}
-      #   uses: actions/checkout@v6
-      #   with:
-      #     # Checks out the exact tag entered by the user
-      #     ref: ${{ inputs.release_tag }}
-
-      # - name: Get release commit sha.
-      #   run: |
-      #     release_commit_sha=$(git rev-parse HEAD)
-      #     echo "RELEASE_COMMIT_SHA=$release_commit_sha"
-      #     echo "RELEASE_COMMIT_SHA=$release_commit_sha" >> $GITHUB_ENV
-
-      # - name: Set release info string in apio/__init__.py
-      #   uses: fpgawars/apio-workflows/.github/actions/set-apio-release-info@main
-      #   with:
-      #     repo_path: .
-      #     prefix: pypi
-      #     release_tag: ${{ inputs.release_tag }}
-
-      # -- Install and and configure python
-      # - name: Set up Python
-      #   uses: actions/setup-python@v6
-      #   with:
-      #     python-version: "3.13"
-
-      # # -- Install dependencies.
-      # # --
-      # # -- TODO: Using an old flit as a quick workaround for publishing
-      # # -- failure in Apio issue 948. Find a more long term solution.
-      # - name: Install dependencies
-      #   run: |
-      #     python -m pip install --upgrade pip build "flit<4" "flit_core<4"
-
       - name: Append Apio release info to pyproject.toml
         run: |
-          cat >> pyproject.toml << 'EOF'
+          cat >> ./_apio-repo/pyproject.toml << 'EOF'
 
           [tool.apio-release]
           repo = "${{ env.APIO_REPO }}"
@@ -156,6 +99,7 @@ jobs:
 
       - name: List apio root files
         run: |
+          set -x
           ls -al ./_apio-repo
           ls -al ./_apio-repo/apio
 
@@ -174,30 +118,11 @@ jobs:
 
       - name: Compress the package's dist directory
         run: |
-          # pushd _dist
+          set -x
           pushd _apio-repo
           package="apio-pypi-package-${PACKAGE_TAG}.tgz"
           tar zcf ../${package} dist
           popd
-
-      # - name: Publish to PyPi
-      #   env:
-      #     # TODO: As of Dec 27 2025, PYPI_USERNAME and PYPI_PASSWORD
-      #     # contain a token rather than the actual username and
-      #     # password (good security). We copied PYPI_PASSWORD to
-      #     # PYPI_API_TOKEN and use a literal "__token__" instead
-      #     # of PYPI_USERNAME. Once this new configuration publishes
-      #     # successfully, the two secrets PYPI_USERNAME and PYPI_PASSWORD
-      #     # should be deleted for clarity.
-      #     #
-      #     # FLIT_USERNAME: ${{ secrets.PYPI_USERNAME }}
-      #     # FLIT_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-
-      #     FLIT_USERNAME: __token__
-      #     FLIT_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-      #   run: |
-      #     # invoke publish
-      #     flit publish
 
       - name: Export the pypi package as an artifact
         uses: actions/upload-artifact@v6
