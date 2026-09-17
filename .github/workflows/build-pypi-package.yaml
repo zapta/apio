@@ -78,16 +78,18 @@ jobs:
         run: |
           python -m pip install --upgrade pip build "flit<4" "flit_core<4"
 
+      # We checkout the repo into a subdirectory not to step on BUILD-INFO.json.
       - name: Checkout apio repo
         uses: actions/checkout@v6
         with:
           repository: ${{env.APIO_REPO}}
           ref: ${{env.APIO_COMMIT}}
+          path: _apio-repo
 
       - name: Set apio release info
         uses: fpgawars/apio-workflows/.github/actions/set-apio-release-info@main
         with:
-          repo_path: .
+          repo_path: _apio-repo
           prefix: pypi
           release_tag: ${{env.RELEASE_TAG}}
 
@@ -146,20 +148,24 @@ jobs:
           commit = "${{ env.APIO_COMMIT }}"
           EOF
 
-          cat -n pyproject.toml
+          cat -n _apio-repo/pyproject.toml
 
       - name: Copy build info to apio
         run: |
-          cp ./BUILD-INFO.json ./apio
+          cp ./BUILD-INFO.json ./_apio_repo/apio
 
-      - name: Build the package
+      - name: Build the package in dist dir
         run: |
-          # Creates dist/*.tar.gz and dist/*.whl from pyproject.toml
+          cd _apio-repo
           python -m build
+
+      - name: List dist directory
+        run: |
+          ls -al_apio-repo/dist
 
       - name: List package items
         run: |
-          tar -tzf dist/*.tar.gz | tree --fromfile .
+          tar -tzf _apio-repo/dist/*.tar.gz | tree --fromfile _apio-repo
 
       # - name: Publish to PyPi
       #   env:
