@@ -277,7 +277,8 @@ jobs:
           cat -n RELEASE-BODY.txt
 
       - name: Cleanup old pre-releases
-        uses: fpgawars/apio-workflows/.github/actions/cleanup-old-prereleases@main
+        # uses: fpgawars/apio-workflows/.github/actions/cleanup-old-prereleases@main
+        uses: zapta/apio-workflows/.github/actions/cleanup-old-prereleases@main
 
       - name: Ensure no conflicting release (again)
         uses: fpgawars/apio-workflows/.github/actions/ensure-no-conflicting-release@main
