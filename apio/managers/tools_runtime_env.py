@@ -185,26 +185,40 @@ class ToolsRuntimeEnv:
             cout(f"Fixing {LD_LIBRARY_PATH} for linux pyinstaller.")
 
         # -- Get the initial values of the vars
-        ld_library_path_orig: str | None = os.environ.get(LD_LIBRARY_PATH_ORIG)
-        ld_library_path: str | None = os.environ.get(LD_LIBRARY_PATH)
+        pre_ld_library_path: str | None = os.environ.get(LD_LIBRARY_PATH)
+        pre_ld_library_path_orig: str | None = os.environ.get(
+            LD_LIBRARY_PATH_ORIG
+        )
 
         if is_debug(1):
-            cout(f"{ld_library_path_orig=}")
-            cout(f"{ld_library_path=}")
+            cout(f"[pre-fix] {LD_LIBRARY_PATH}={pre_ld_library_path}")
+            cout(
+                f"[pre-fix] {LD_LIBRARY_PATH_ORIG}={pre_ld_library_path_orig}"
+            )
 
-        # -- Fix LD_LIBRARY_PATH.
-        if ld_library_path_orig is None:
-            # -- LD_LIBRARY_PATH was originally unset, clear it.
+        # -- Fix LD_LIBRARY_PATH and LD_LIBRARY_PATH_ORIG
+        if pre_ld_library_path_orig is None:
+            # -- LD_LIBRARY_PATH was originally unset but pyinstaller set it
+            # -- up. Unset it.
             os.environ.pop(LD_LIBRARY_PATH, None)
         else:
             # -- LD_LIBRARY_PATH was originally set, restore the original
             # -- value.
-            os.environ[LD_LIBRARY_PATH] = ld_library_path_orig
+            os.environ[LD_LIBRARY_PATH] = pre_ld_library_path_orig
+            # -- Unset LD_LIBRARY_PATH_ORIG. Since we will ignore future
+            # -- requests for fixing, we don't need it anymore and we want to
+            # -- hide it from the tool, to preserve the original env.
+            os.environ.pop(LD_LIBRARY_PATH_ORIG, None)
 
         # -- Show outcome.
         if is_debug(1):
-            fixed_ld_library_path = os.environ.get(LD_LIBRARY_PATH)
-            cout(f"{fixed_ld_library_path=}")
+            post_ld_library_path = os.environ.get(LD_LIBRARY_PATH)
+            post_ld_library_path_orig = os.environ.get(LD_LIBRARY_PATH_ORIG)
+            cout(f"[post-fix] {LD_LIBRARY_PATH}={post_ld_library_path}")
+            cout(
+                f"[post-fix] {LD_LIBRARY_PATH_ORIG}="
+                + f"{post_ld_library_path_orig}"
+            )
 
     def set_env_for_tools(
         self, *, quiet: bool = False, verbose: bool = False
