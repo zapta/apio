@@ -649,6 +649,10 @@ class PackageManager:
                 result.orphans[base_name] = OrphanType.ORPHAN_FILE
 
         # -- All done
+        if is_debug(1):
+            cout("*** Packages scan results:")
+            result.dump()
+
         return result
 
     def _maybe_load_installed_packages_file(self):
