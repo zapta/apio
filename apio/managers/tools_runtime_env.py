@@ -9,9 +9,15 @@
 import os
 from dataclasses import dataclass
 from typing import Any
+from apio.common.debug_util import is_debug
 from apio.common.apio_console import cout, cstyle
 from apio.common.apio_styles import EMPH2, EMPH3
 from apio.utils.apio_platforms import ApioPlatform
+
+# -- Env vars involved in pyinstaller fixing under linux.
+# -- See See https://github.com/FPGAwars/apio/issues/887
+LD_LIBRARY_PATH = "LD_LIBRARY_PATH"
+LD_LIBRARY_PATH_ORIG = "LD_LIBRARY_PATH_ORIG"
 
 
 @dataclass(frozen=True)
@@ -39,9 +45,12 @@ class ToolsRuntimeEnv:
         apio_platform: ApioPlatform,
         is_pyinstaller: bool,
     ) -> None:
+        # -- Save arguments.
         self._required_packages = required_packages
         self._apio_platform = apio_platform
         self._is_pyinstaller = is_pyinstaller
+
+        # -- Initialize state.
         self._env_was_already_set: bool = False
 
     def scons_shell_id(self) -> str:
@@ -160,6 +169,43 @@ class ToolsRuntimeEnv:
         for name, value in mutations.set_vars.items():
             os.environ[name] = value
 
+    def _fix_env_for_py_installer(self) -> None:
+        """Called when running under pyinstaller to fix the env modifications
+        done by pyinstaller. See https://github.com/FPGAwars/apio/issues/887
+        """
+        # -- Sanity check
+        assert self._is_pyinstaller
+
+        # -- For now we fix the env only for linux
+        if not self._apio_platform.is_linux:
+            return
+
+        # -- Here when fixing for linux
+        if is_debug(1):
+            cout(f"Fixing {LD_LIBRARY_PATH} for linux pyinstaller.")
+
+        # -- Get the initial values of the vars
+        ld_library_path_orig: str | None = os.environ.get(LD_LIBRARY_PATH_ORIG)
+        ld_library_path: str | None = os.environ.get(LD_LIBRARY_PATH)
+
+        if is_debug(1):
+            cout(f"{ld_library_path_orig=}")
+            cout(f"{ld_library_path=}")
+
+        # -- Fix LD_LIBRARY_PATH.
+        if ld_library_path_orig is None:
+            # -- LD_LIBRARY_PATH was originally unset, clear it.
+            os.environ.pop(LD_LIBRARY_PATH, None)
+        else:
+            # -- LD_LIBRARY_PATH was originally set, restore the original
+            # -- value.
+            os.environ[LD_LIBRARY_PATH] = ld_library_path_orig
+
+        # -- Show outcome.
+        if is_debug(1):
+            fixed_ld_library_path = os.environ.get(LD_LIBRARY_PATH)
+            cout(f"{fixed_ld_library_path=}")
+
     def set_env_for_tools(
         self, *, quiet: bool = False, verbose: bool = False
     ) -> None:
@@ -185,13 +231,22 @@ class ToolsRuntimeEnv:
         if verbose:
             self._dump_env_mutations(mutations)
 
-        # -- If this is the first call in this apio invocation, apply the
-        # -- mutations. These mutations are temporary for the lifetime of this
-        # -- process and does not affect the user's shell environment.
-        # -- The mutations are also inherited by child processes such as the
-        # -- scons processes.
-        if not self._env_was_already_set:
-            self._apply_env_mutations(mutations)
-            self._env_was_already_set = True
-            if not verbose and not quiet:
-                cout("Setting shell vars.")
+        # -- Return if already set
+        if self._env_was_already_set:
+            return
+
+        # -- Apply the mutations. These mutations are temporary for the
+        # -- lifetime of this process and does not affect the user's shell
+        # -- environment. The mutations are also inherited by child processes
+        # -- such as the scons processes.
+        if not verbose and not quiet:
+            cout("Setting shell vars.")
+        self._apply_env_mutations(mutations)
+
+        # -- If running under pyinstaller, compensate for pyinstaller
+        # -- modifications fo the env.
+        if self._is_pyinstaller:
+            self._fix_env_for_py_installer()
+
+        # -- Mark is as done so we skip it if called again.
+        self._env_was_already_set = True
