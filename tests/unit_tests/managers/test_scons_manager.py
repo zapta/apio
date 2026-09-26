@@ -138,9 +138,7 @@ def test_default_params(apio_runner: ApioRunner):
         expected.environment.trellis_path = str(
             sb.packages_dir / "oss-cad-suite/share/trellis"
         )
-        expected.environment.scons_shell_id = (
-            apio_ctx.tools_runtime_env.scons_shell_id()
-        )
+        expected.environment.scons_shell_id = apio_ctx.scons_shell_id()
 
         expected.environment.xilinx_prjxray_db_path = str(
             sb.packages_dir / "openxc7/share/nextpnr/external/prjxray-db"
@@ -186,9 +184,7 @@ def test_explicit_params(apio_runner: ApioRunner):
         expected.environment.trellis_path = str(
             sb.packages_dir / "oss-cad-suite/share/trellis"
         )
-        expected.environment.scons_shell_id = (
-            apio_ctx.tools_runtime_env.scons_shell_id()
-        )
+        expected.environment.scons_shell_id = apio_ctx.scons_shell_id()
 
         expected.environment.xilinx_prjxray_db_path = str(
             sb.packages_dir / "openxc7/share/nextpnr/external/prjxray-db"

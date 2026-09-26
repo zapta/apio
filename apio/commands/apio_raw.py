@@ -162,9 +162,7 @@ def cli(
 
     # -- Set the env for the tools. If verbose, also dumping the env changes
     # -- in a user friendly way.
-    apio_ctx.tools_runtime_env.set_env_for_tools(
-        quiet=not verbose, verbose=verbose
-    )
+    apio_ctx.set_env_for_tools(quiet=not verbose, verbose=verbose)
 
     # -- If no command, we are done.
     if not cmd:

@@ -6,11 +6,12 @@
 # -- Author Jesús Arroyo
 # -- License GPLv2
 
+import os
 import platform
-from dataclasses import dataclass
 from enum import Enum, unique
 from pathlib import Path
 import json5
+from apio.common import tools_runtime_env
 from apio.common.apio_console import cout, cstyle, fatal_error
 from apio.common.apio_styles import INFO, EMPH1
 from apio.common.common_util import env_build_path
@@ -21,7 +22,6 @@ from apio.utils.apio_platforms import ApioPlatform
 from apio.managers.project import Project, load_project_from_file
 from apio.managers.package_manager import PackageManager
 from apio.managers.apio_definitions import ApioDefinitions
-from apio.managers.tools_runtime_env import ToolsRuntimeEnv
 from apio.utils.resource_util import (
     ProjectResources,
     collect_project_resources,
@@ -46,20 +46,6 @@ PACKAGES_JSONC = "packages.jsonc"
 # -----------------------------------------
 # -- General config information.
 CONFIG_JSONC = "config.jsonc"
-
-
-@dataclass(frozen=True)
-class EnvMutations:
-    """Contains mutations to the system env."""
-
-    # -- List of env vars to unset.
-    unset_vars: list[str]
-
-    # -- PATH items to add.
-    paths: list[str]
-
-    # -- Dict with env vars name/value to set.
-    set_vars: dict[str, str]
 
 
 @unique
@@ -105,7 +91,7 @@ class ApioContext:
         "package_manager",
         "platform",
         "platform_id",
-        "tools_runtime_env",
+        "_tools_env_was_set",
         "all_packages",
         "required_packages",
         "_project_dir",
@@ -310,10 +296,8 @@ class ApioContext:
         else:
             assert not self.has_project, "init(): project loaded"
 
-        # -- Set the tools runtime env manager
-        self.tools_runtime_env = ToolsRuntimeEnv(
-            self.required_packages, self.platform, util.is_pyinstaller_app()
-        )
+        # -- Initialized the env setting state
+        self._tools_env_was_set = False
 
     def report_project_env(self):
         """Report to the user the env and board used. Asserts that the
@@ -534,3 +518,100 @@ class ApioContext:
     def is_windows(self) -> bool:
         """Returns True iff underlying platform is a Windows."""
         return self.platform.is_windows
+
+    def set_env_for_tools(
+        self,
+        *,
+        quiet: bool = False,
+        verbose: bool = False,
+    ) -> None:
+        """Sets the environment variables for using all the that are
+        available for this platform, even if currently not installed.
+
+        The function sets the environment only on first call and in latter
+        calls skips the operation silently.
+
+        If quite is set, no output is printed. When verbose is set, additional
+        output such as the env vars mutations are printed, otherwise, a minimal
+        information is printed to make the user aware that they commands they
+        see are executed in a modified env settings.
+        """
+
+        # -- If this fails, this is a programming error. Quiet and verbose
+        # -- cannot be combined.
+        assert not (quiet and verbose), "Can't have both quite and verbose."
+
+        # -- Collect the env mutations from all packages.
+        mutations = tools_runtime_env.get_env_mutations(
+            self.required_packages, self.platform, util.is_pyinstaller_app()
+        )
+
+        if verbose:
+            tools_runtime_env.dump_env_mutations(mutations, self.platform)
+
+        # -- Return if already set. We don't want to append duplicates to the
+        # -- $PATH.
+        if self._tools_env_was_set:
+            return
+
+        # -- Apply the mutations. These mutations are temporary for the
+        # -- lifetime of this process and does not affect the user's shell
+        # -- environment. The mutations are also inherited by child processes
+        # -- such as the scons processes.
+        if not verbose and not quiet:
+            cout("Setting shell vars.")
+
+        tools_runtime_env.apply_env_mutations(mutations, os.environ)
+
+        # -- Mark is as done so we skip it if called again.
+        self._tools_env_was_set = True
+
+    def get_env_for_tools(
+        self,
+        *,
+        quiet: bool = False,
+        verbose: bool = False,
+    ) -> dict[str, str]:
+        """Sets the environment variables for using all the that are
+        available for this platform, even if currently not installed.
+
+        The function sets the environment only on first call and in latter
+        calls skips the operation silently.
+
+        If quite is set, no output is printed. When verbose is set, additional
+        output such as the env vars mutations are printed, otherwise, a minimal
+        information is printed to make the user aware that they commands they
+        see are executed in a modified env settings.
+        """
+
+        # -- If this fails, this is a programming error. Quiet and verbose
+        # -- cannot be combined.
+        assert not (quiet and verbose), "Can't have both quite and verbose."
+
+        # -- Collect the env mutations from all packages.
+        mutations = tools_runtime_env.get_env_mutations(
+            self.required_packages, self.platform, util.is_pyinstaller_app()
+        )
+
+        if verbose:
+            tools_runtime_env.dump_env_mutations(mutations, self.platform)
+
+        # -- Make an independent copy of os.environ.
+        env: dict[str, str] = os.environ.copy()
+
+        # -- Apply the mutations the copy.
+        if not verbose and not quiet:
+            cout("Setting shell vars.")
+
+        tools_runtime_env.apply_env_mutations(mutations, env)
+
+        # -- All done.
+        return env
+
+    def scons_shell_id(self) -> str:
+        """
+        Returns a simplified string name of the shell that SCons will use
+        for executing shell-dependent commands. See code below for possible
+        values.
+        """
+        return tools_runtime_env.scons_shell_id(self.platform)
